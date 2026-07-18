@@ -18,7 +18,6 @@ export const NAV_ITEMS: NavItem[] = [
 export const TASK_STATUS_LABELS: Record<string, string> = {
   'todo': 'To Do',
   'in-progress': 'In Progress',
-  'review': 'In Review',
   'done': 'Done',
 };
 
@@ -26,7 +25,6 @@ export const PRIORITY_COLORS: Record<string, string> = {
   low: '#6366f1',
   medium: '#f59e0b',
   high: '#f97316',
-  urgent: '#ef4444',
 };
 
 export const PROJECT_COLORS = [

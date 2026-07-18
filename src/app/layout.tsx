@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { AuthProvider } from '@/contexts/auth-context';
+import { ToastProvider } from '@/contexts/toast-context';
 import './globals.css';
 
 const inter = Inter({
@@ -22,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} dark antialiased`}>
       <body className="min-h-screen bg-background text-foreground">
-        {children}
+        <ToastProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

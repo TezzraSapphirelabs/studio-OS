@@ -1,23 +1,64 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { GlassCard, StatCard, ProgressBar } from '@/components';
 import { GridIcon, FolderIcon, CheckSquareIcon, UsersIcon, TrendingUpIcon, ChevronRightIcon, ClockIcon } from '@/components/icons';
 import { mockData } from '@/services';
-import { getCompletionPercent } from '@/utils';
+import { getCompletionPercent, getDisplayName } from '@/utils';
+import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
+import { subscribeToProjects } from '@/services/projects';
+import { type Project } from '@/types';
 
 export default function DashboardPage() {
-  const { stats, projects, tasks, recentActivity } = mockData;
+  const { user } = useAuth();
+  const { tasks, recentActivity } = mockData;
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const unsub = subscribeToProjects(
+      user.uid,
+      (data) => {
+        setProjects(data);
+        setLoading(false);
+      },
+      (err) => console.error(err)
+    );
+    return () => { unsub(); };
+  }, [user]);
+
   const activeProjects = projects.filter((p) => p.status === 'active');
   const inProgressTasks = tasks.filter((t) => t.status === 'in-progress');
+
+  const stats = useMemo(() => {
+    let completed = 0;
+    let active = 0;
+    const uniqueMembers = new Set<string>();
+
+    projects.forEach(p => {
+      completed += p.completedTaskCount || 0;
+      active += (p.taskCount || 0) - (p.completedTaskCount || 0);
+      if (p.memberUids) {
+        p.memberUids.forEach(uid => uniqueMembers.add(uid));
+      }
+    });
+
+    return {
+      totalProjects: projects.length,
+      activeTasks: active,
+      completedTasks: completed,
+      teamMembers: uniqueMembers.size,
+    };
+  }, [projects]);
 
   return (
     <div className="space-y-8">
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Good afternoon, Sarah
+          Good afternoon, {getDisplayName(user)}
         </h1>
         <p className="mt-1 text-sm text-white/40">
           Here&apos;s what&apos;s happening across your workspace today.
@@ -50,14 +91,16 @@ export default function DashboardPage() {
           trendUp={true}
           accentColor="#22c55e"
         />
-        <StatCard
-          label="Team Members"
-          value={stats.teamMembers}
-          icon={<UsersIcon size={22} />}
-          trend="All active"
-          trendUp={true}
-          accentColor="#f59e0b"
-        />
+        <Link href="/projects" className="block transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <StatCard
+            label="Team Members"
+            value={stats.teamMembers}
+            icon={<UsersIcon size={22} />}
+            trend="All active"
+            trendUp={true}
+            accentColor="#ec4899"
+          />
+        </Link>
       </div>
 
       {/* Two-column layout */}
@@ -150,7 +193,9 @@ export default function DashboardPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-white/60">
-                        <span className="font-medium text-white/80">{activity.user}</span>{' '}
+                        <span className="font-medium text-white/80">
+                          {activity.user === 'Current User' ? getDisplayName(user) : activity.user}
+                        </span>{' '}
                         {activity.action}{' '}
                         <span className="font-medium text-white/80">{activity.target}</span>
                       </p>

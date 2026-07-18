@@ -6,15 +6,18 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
 import { Suspense } from 'react';
 
-function LoginContent() {
+function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') || '/dashboard';
   
-  const { user, loading: authLoading, login, googleLogin, githubLogin, linkingData, resolveLinking, cancelLinking, forgotPassword } = useAuth();
+  const { user, loading: authLoading, register, googleLogin, githubLogin, linkingData, resolveLinking, cancelLinking, forgotPassword } = useAuth();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -26,20 +29,37 @@ function LoginContent() {
     }
   }, [authLoading, user, router, returnTo]);
 
-  async function handleEmailSignIn(e: React.FormEvent) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter both email and password.');
+    setError(null);
+    setSuccess(null);
+
+    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+      setError('Please fill in all fields.');
       return;
     }
-    setError(null);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
     setLoading(true);
-    const err = await login(email, password);
+    const err = await register(email, password, name);
+    
     if (err) {
       setError(err);
       setLoading(false);
     } else {
-      router.push(returnTo);
+      setSuccess('Account created successfully! Verification email sent. Redirecting...');
+      setTimeout(() => {
+        router.push(returnTo);
+      }, 1500);
     }
   }
 
@@ -72,7 +92,7 @@ function LoginContent() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07070a]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07070a] py-12">
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-violet-600/[0.12] blur-[100px]" />
@@ -90,7 +110,7 @@ function LoginContent() {
         }}
       />
 
-      {/* Login Card or Link Account Card */}
+      {/* Register Card or Link Account Card */}
       <div className="relative z-10 w-full max-w-md px-4">
         {linkingData ? (
           <div className="animate-fade-in-up rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 shadow-2xl backdrop-blur-2xl sm:p-10 text-center">
@@ -100,12 +120,6 @@ function LoginContent() {
               Please verify your existing account to link them.
             </p>
             
-            {success && (
-              <div className="mb-6 rounded-xl border border-green-500/20 bg-green-500/[0.08] px-4 py-3 text-sm text-green-300">
-                {success}
-              </div>
-            )}
-
             {error && (
               <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-300">
                 {error}
@@ -314,15 +328,15 @@ function LoginContent() {
         ) : (
           <div className="animate-fade-in-up rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 shadow-2xl backdrop-blur-2xl sm:p-10">
           {/* Logo */}
-          <div className="mb-8 text-center">
+          <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/25">
               <span className="text-xl font-bold text-white">S</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white">
-              Welcome to Studio OS
+              Create an account
             </h1>
             <p className="mt-2 text-sm text-white/40">
-              Sign in to your workspace
+              Join Studio OS today
             </p>
           </div>
 
@@ -333,8 +347,29 @@ function LoginContent() {
             </div>
           )}
 
+          {/* Success message */}
+          {success && (
+            <div className="mb-4 rounded-xl border border-green-500/20 bg-green-500/[0.08] px-4 py-3 text-sm text-green-300">
+              {success}
+            </div>
+          )}
+
           {/* Form */}
-          <form onSubmit={handleEmailSignIn} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Jane Doe"
+                disabled={loading}
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
             <div>
               <label htmlFor="email" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
                 Email
@@ -350,19 +385,28 @@ function LoginContent() {
               />
             </div>
             <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label htmlFor="password" className="block text-xs font-medium uppercase tracking-wider text-white/40">
-                  Password
-                </label>
-                <Link href="/forgot-password" className="text-xs font-medium text-violet-400 transition-colors hover:text-violet-300">
-                  Forgot Password?
-                </Link>
-              </div>
+              <label htmlFor="password" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+                Password
+              </label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={loading}
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/40">
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={loading}
                 className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -380,7 +424,7 @@ function LoginContent() {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               ) : (
-                'Sign In'
+                'Create Account'
               )}
             </button>
           </form>
@@ -388,7 +432,7 @@ function LoginContent() {
           {/* Divider */}
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-white/[0.06]" />
-            <span className="text-xs text-white/25">or continue with</span>
+            <span className="text-xs text-white/25">or register with</span>
             <div className="h-px flex-1 bg-white/[0.06]" />
           </div>
 
@@ -415,9 +459,9 @@ function LoginContent() {
           </div>
 
           <p className="mt-6 text-center text-xs text-white/25">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="font-medium text-violet-400 cursor-pointer hover:text-violet-300 transition-colors">
-              Create one
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-violet-400 cursor-pointer hover:text-violet-300 transition-colors">
+              Sign In
             </Link>
           </p>
         </div>
@@ -427,14 +471,14 @@ function LoginContent() {
   );
 }
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-[#07070a]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
       </div>
     }>
-      <LoginContent />
+      <RegisterContent />
     </Suspense>
   );
 }

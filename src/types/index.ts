@@ -2,41 +2,80 @@
 // Studio OS — Core Type Definitions
 // ============================================================
 
-export interface User {
-  id: string;
-  name: string;
+export type UserRole = 'Owner' | 'Admin' | 'Developer' | 'Project Manager' | 'Designer' | 'Member' | 'Viewer';
+
+export interface UserProfile {
+  uid: string;
   email: string;
-  avatar?: string;
-  role: 'admin' | 'member' | 'viewer';
-  createdAt: Date;
+  displayName: string;
+  role: UserRole;
+  photoURL: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type ProjectStatus = 'active' | 'archived' | 'draft';
 
 export interface Project {
   id: string;
+  ownerUid: string;
+  memberUids: string[];
   name: string;
   description: string;
-  status: 'active' | 'archived' | 'draft';
+  status: ProjectStatus;
   color: string;
   icon?: string;
   memberCount: number;
   taskCount: number;
   completedTaskCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type ProjectRole = 'owner' | 'admin' | 'member' | 'viewer';
+
+export interface ProjectMember {
+  id: string; // `${projectId}_${userId}`
+  projectId: string;
+  userId: string;
+  email: string;
+  displayName: string;
+  photoURL: string | null;
+  role: ProjectRole;
+  joinedAt: string;
+}
+
+export type InviteStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired';
+
+export interface ProjectInvite {
+  id: string;
+  projectId: string;
+  inviterUid: string;
+  inviteeEmail: string;
+  role: ProjectRole;
+  status: InviteStatus;
+  token?: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TaskStatus = 'todo' | 'in-progress' | 'done';
+export type TaskPriority = 'low' | 'medium' | 'high';
 
 export interface Task {
   id: string;
+  ownerUid: string;
+  projectId: string;
   title: string;
   description?: string;
-  status: 'todo' | 'in-progress' | 'review' | 'done';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  projectId: string;
+  status: TaskStatus;
+  priority: TaskPriority;
   assigneeId?: string;
-  dueDate?: Date;
+  dueDate?: string; // ISO string
   tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }
 
 export interface NavItem {
@@ -51,4 +90,13 @@ export interface DashboardStats {
   activeTasks: number;
   completedTasks: number;
   teamMembers: number;
+}
+
+export interface ProjectActivity {
+  id: string;
+  projectId: string;
+  ownerUid: string;
+  action: string;
+  target: string;
+  createdAt: string; // ISO string
 }

@@ -7,7 +7,7 @@ import { mockData } from '@/services';
 import { TASK_STATUS_LABELS, PRIORITY_COLORS } from '@/lib/constants';
 import type { Task } from '@/types';
 
-const STATUSES = ['todo', 'in-progress', 'review', 'done'] as const;
+const STATUSES = ['todo', 'in-progress', 'done'] as const;
 
 export default function TasksPage() {
   const [filter, setFilter] = useState<string>('all');
@@ -121,9 +121,7 @@ export default function TasksPage() {
                   ? 'bg-emerald-500/10 text-emerald-400'
                   : task.status === 'in-progress'
                     ? 'bg-blue-500/10 text-blue-400'
-                    : task.status === 'review'
-                      ? 'bg-amber-500/10 text-amber-400'
-                      : 'bg-white/[0.04] text-white/40'
+                    : 'bg-white/[0.04] text-white/40'
               }`}>
                 {TASK_STATUS_LABELS[task.status]}
               </span>

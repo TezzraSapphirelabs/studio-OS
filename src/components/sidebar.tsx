@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, APP_NAME } from '@/lib/constants';
 import { iconMap, LogOutIcon, XIcon } from './icons';
+import { useAuth } from '@/contexts/auth-context';
+import { getDisplayName, getInitials } from '@/utils';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   return (
     <>
@@ -94,14 +97,31 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Bottom section */}
         <div className="border-t border-white/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl p-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-xs font-bold text-white">
-              SC
-            </div>
+            {user?.photoURL ? (
+              <img 
+                src={user.photoURL} 
+                alt="Profile" 
+                className="h-9 w-9 rounded-full object-cover border border-white/[0.08]"
+              />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-xs font-bold text-white">
+                {getInitials(user?.displayName, user?.email)}
+              </div>
+            )}
+            
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-white">Sarah Chen</p>
-              <p className="truncate text-xs text-white/40">sarah@studio.os</p>
+              <p className="truncate text-sm font-medium text-white">
+                {getDisplayName(user)}
+              </p>
+              <p className="truncate text-xs text-white/40">
+                {user?.email || ''}
+              </p>
             </div>
-            <button className="flex h-8 w-8 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60">
+            <button 
+              onClick={logout}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+              title="Sign Out"
+            >
               <LogOutIcon size={16} />
             </button>
           </div>

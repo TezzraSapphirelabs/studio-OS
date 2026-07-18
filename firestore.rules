@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Returns the exact role for write operations (bypasses query planner limitations)
+    function getProjectRole(projectId) {
+      return (exists(/databases/$(database)/documents/projects/$(projectId)) && get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid)
+        ? 'owner'
+        : (exists(/databases/$(database)/documents/members/$(projectId + "_" + request.auth.uid))
+           ? get(/databases/$(database)/documents/members/$(projectId + "_" + request.auth.uid)).data.role
+           : 'none');
+    }
+
+    function isRole(projectId, allowedRoles) {
+      return getProjectRole(projectId) in allowedRoles;
+    }
+
+    // Safe for queries: avoids string concatenation inside get() paths which breaks the Firestore query planner
+    function isProjectMember(projectId) {
+      return exists(/databases/$(database)/documents/projects/$(projectId)) && (
+        get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid ||
+        ('memberUids' in get(/databases/$(database)/documents/projects/$(projectId)).data && request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.memberUids)
+      );
+    }
+
+    match /projects/{projectId} {
+      allow read: if request.auth != null && (
+        resource.data.ownerUid == request.auth.uid ||
+        ('memberUids' in resource.data && request.auth.uid in resource.data.memberUids)
+      );
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if request.auth != null && (
+        isRole(projectId, ['owner'])
+        || (isRole(projectId, ['admin']) && request.resource.data.ownerUid == resource.data.ownerUid)
+        // Allow a new member to add themselves to memberUids after accepting an invite
+        || (exists(/databases/$(database)/documents/members/$(projectId + "_" + request.auth.uid))
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids']))
+      );
+      allow delete: if request.auth != null && isRole(projectId, ['owner']);
+    }
+
+    match /tasks/{taskId} {
+      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow create: if request.auth != null && isRole(request.resource.data.projectId, ['owner', 'admin', 'member']);
+      allow update: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner', 'admin'])
+        // Member can update if they are the current assignee, OR if they are assigning it to themselves
+        || (isRole(resource.data.projectId, ['member']) && (
+             (resource.data.assigneeId == request.auth.uid) || 
+             (request.resource.data.assigneeId == request.auth.uid)
+           ))
+      );
+      allow delete: if request.auth != null && isRole(resource.data.projectId, ['owner', 'admin']);
+    }
+
+    match /activities/{activityId} {
+      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
+      allow create: if request.auth != null && (
+        isRole(request.resource.data.projectId, ['owner', 'admin', 'member']) ||
+        request.resource.data.ownerUid == request.auth.uid
+      );
+      allow delete: if request.auth != null && (isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid);
+    }
+
+    match /members/{memberDocId} {
+      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.userId == request.auth.uid);
+      allow create: if request.auth != null && (
+        request.resource.data.userId == request.auth.uid || isRole(request.resource.data.projectId, ['owner', 'admin'])
+      );
+      allow update: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner']) || 
+        (isRole(resource.data.projectId, ['admin']) && request.resource.data.role != 'owner' && resource.data.role != 'owner')
+      );
+      allow delete: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner']) || 
+        (isRole(resource.data.projectId, ['admin']) && resource.data.role != 'owner') ||
+        resource.data.userId == request.auth.uid 
+      );
+    }
+
+    match /projectInvites/{inviteId} {
+      allow read: if request.auth != null && (
+        request.auth.token.email == resource.data.inviteeEmail || isProjectMember(resource.data.projectId)
+      );
+      allow create: if request.auth != null && isRole(request.resource.data.projectId, ['owner', 'admin']);
+      allow update: if request.auth != null && (
+        request.auth.token.email == resource.data.inviteeEmail || isRole(resource.data.projectId, ['owner', 'admin'])
+      );
+      allow delete: if request.auth != null && (
+        request.auth.token.email == resource.data.inviteeEmail || isRole(resource.data.projectId, ['owner', 'admin'])
+      );
+    }
+  }
+}
