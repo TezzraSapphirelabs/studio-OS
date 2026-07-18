@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { GlassCard, StatCard, ProgressBar } from '@/components';
-import { GridIcon, FolderIcon, CheckSquareIcon, UsersIcon, TrendingUpIcon, ChevronRightIcon, ClockIcon } from '@/components/icons';
+import { FolderIcon, CheckSquareIcon, UsersIcon, TrendingUpIcon, ChevronRightIcon, ClockIcon } from '@/components/icons';
 import { mockData } from '@/services';
 import { getCompletionPercent, getDisplayName } from '@/utils';
 import { useAuth } from '@/contexts/auth-context';
@@ -14,7 +14,6 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const { tasks, recentActivity } = mockData;
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -22,7 +21,6 @@ export default function DashboardPage() {
       user.uid,
       (data) => {
         setProjects(data);
-        setLoading(false);
       },
       (err) => console.error(err)
     );

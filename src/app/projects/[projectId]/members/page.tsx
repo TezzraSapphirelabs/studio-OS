@@ -6,10 +6,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { GlassCard } from '@/components';
 import { subscribeToProjectMembers, removeMember, updateMemberRole } from '@/services/members';
 import { type ProjectMember, type ProjectRole } from '@/types';
-import { formatRelativeDate } from '@/utils';
-import { TrashIcon, EditIcon, UsersIcon } from '@/components/icons';
-import { useToast } from '@/contexts/toast-context';
+import { TrashIcon, UsersIcon } from '@/components/icons';
 
+import { useToast } from '@/contexts/toast-context';
 // We'll build the InviteModal next
 import InviteModal from './invite-modal';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -21,6 +20,7 @@ import { XIcon } from '@/components/icons';
 export default function ProjectMembersPage() {
   const { user } = useAuth();
   const { project, userRole, loading: projectLoading } = useProject();
+  const { toast } = useToast();
 
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [invites, setInvites] = useState<ProjectInvite[]>([]);
@@ -30,15 +30,11 @@ export default function ProjectMembersPage() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
-  const [toastMessage, setToastMessage] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
-  const toast = (msg: string, type: 'success' | 'error') => {
-    setToastMessage({ msg, type });
-    setTimeout(() => setToastMessage(null), 3000);
-  };
 
   useEffect(() => {
     if (!project) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     
     // Subscribe to members
@@ -78,7 +74,6 @@ export default function ProjectMembersPage() {
   if (projectLoading) return null;
 
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
-  const isOwner = userRole === 'owner';
 
   async function handleRoleChange(member: ProjectMember, newRole: ProjectRole) {
     if (!user || !project) return;
@@ -154,6 +149,7 @@ export default function ProjectMembersPage() {
           members.map((member) => (
             <GlassCard key={member.id} padding="md" className="flex flex-col justify-between">
               <div className="flex items-start gap-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.displayName)}&background=3b82f6&color=fff`}
                   alt={member.displayName}

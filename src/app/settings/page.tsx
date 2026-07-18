@@ -7,7 +7,7 @@ import { getDisplayName } from '@/utils';
 import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
 
 export default function SettingsPage() {
-  const { user, userRole, loading, roleError, roleLoading, retryRoleSync } = useAuth();
+  const { user, userRole, roleError, roleLoading, retryRoleSync } = useAuth();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   const sections = [

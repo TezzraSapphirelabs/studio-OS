@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GlassCard, ProgressBar } from '@/components';
-import { FolderIcon, PlusIcon, SearchIcon, FilterIcon, EditIcon, ArchiveIcon, ArchiveRestoreIcon, TrashIcon, MoreVerticalIcon, XIcon } from '@/components/icons';
+import { FolderIcon, PlusIcon, SearchIcon, EditIcon, ArchiveIcon, ArchiveRestoreIcon, TrashIcon, MoreVerticalIcon, XIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
 import {
   fetchProjects,
@@ -12,7 +12,6 @@ import {
   unarchiveProject,
   deleteProject,
   type CreateProjectInput,
-  type UpdateProjectInput,
 } from '@/services/projects';
 import { getCompletionPercent, formatRelativeDate } from '@/utils';
 import type { Project, ProjectStatus } from '@/types';
@@ -322,6 +321,7 @@ export default function ProjectsPage() {
     setLoading(false);
   }, [user]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadProjects(); }, [loadProjects]);
 
   // Auto-retry on reconnect

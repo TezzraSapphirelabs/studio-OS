@@ -84,6 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await syncUserProfile(auth.currentUser);
       setUserRole(profile.role);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to sync user profile", error);
       setRoleError(error.message || 'Failed to sync user profile');
@@ -101,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const profile = await syncUserProfile(firebaseUser);
           setUserRole(profile.role);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           console.error("Failed to sync user profile", error);
           setRoleError(error.message || 'Failed to sync user profile');

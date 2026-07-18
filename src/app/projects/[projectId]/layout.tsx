@@ -61,6 +61,7 @@ export default function ProjectLayout({
 
   useEffect(() => {
     if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const ref = doc(db, 'projects', projectId);
     

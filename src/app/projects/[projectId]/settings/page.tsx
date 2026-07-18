@@ -20,6 +20,7 @@ export default function ProjectSettingsPage() {
 
   useEffect(() => {
     if (project) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: project.name,
         description: project.description,

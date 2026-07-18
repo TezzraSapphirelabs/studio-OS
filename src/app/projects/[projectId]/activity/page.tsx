@@ -7,7 +7,7 @@ import { GlassCard } from '@/components';
 import { subscribeToProjectActivity } from '@/services/activity';
 import { type ProjectActivity } from '@/types';
 import { formatRelativeDate } from '@/utils';
-import { ActivityIcon, CheckCircleIcon, FolderIcon, EditIcon, TrashIcon } from '@/components/icons';
+import { CheckCircleIcon, FolderIcon, EditIcon, TrashIcon } from '@/components/icons';
 
 // Simple fallback ActivityIcon if not exported from icons.tsx
 function TimelineIcon({ action, size = 20 }: { action: string; size?: number }) {
@@ -33,6 +33,7 @@ export default function ProjectActivityPage() {
 
   useEffect(() => {
     if (!user || !project) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const unsubscribe = subscribeToProjectActivity(user.uid, project.id, (data, err) => {
       if (err) setError(err);
@@ -68,13 +69,12 @@ export default function ProjectActivityPage() {
             </svg>
           </div>
           <h3 className="mb-2 text-lg font-semibold text-white">No activity yet</h3>
-          <p className="mb-6 text-sm text-white/40">This project's history will appear here.</p>
+          <p className="mb-6 text-sm text-white/40">This project&apos;s history will appear here.</p>
         </div>
       ) : (
         <GlassCard padding="lg">
           <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-white/[0.08] before:to-transparent">
-            {activities.map((activity, index) => {
-              const isEven = index % 2 === 0;
+            {activities.map((activity) => {
               return (
                 <div key={activity.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                   {/* Icon */}
@@ -87,7 +87,7 @@ export default function ProjectActivityPage() {
                     <div className="flex flex-col gap-1">
                       <p className="text-sm text-white/70">
                         <span className="font-semibold text-white">You</span> {activity.action}{' '}
-                        <span className="font-semibold text-white">"{activity.target}"</span>
+                        <span className="font-semibold text-white">&quot;{activity.target}&quot;</span>
                       </p>
                       <time className="text-xs text-white/30 font-medium">
                         {formatRelativeDate(activity.createdAt)}

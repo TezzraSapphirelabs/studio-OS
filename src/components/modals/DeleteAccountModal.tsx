@@ -74,6 +74,7 @@ export default function DeleteAccountModal({
       await user!.delete();
       // On success, redirect to login via context logout
       await logout();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.code === 'auth/requires-recent-login') {
         setError('Your session has expired. Please log out and log back in before deleting your account.');
@@ -180,6 +181,7 @@ export default function DeleteAccountModal({
                   disabled={loading}
                   className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.08]"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5" />
                   {loading ? 'Deleting...' : 'Sign in with Google to Delete'}
                 </button>

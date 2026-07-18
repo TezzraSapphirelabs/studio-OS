@@ -98,6 +98,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="border-t border-white/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl p-2">
             {user?.photoURL ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img 
                 src={user.photoURL} 
                 alt="Profile" 

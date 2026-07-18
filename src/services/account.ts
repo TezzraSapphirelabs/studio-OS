@@ -23,6 +23,7 @@ export async function validateAccountDeletion(uid: string): Promise<{ error?: st
     }
 
     return {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     return { error: err.message || 'Failed to validate account deletion.' };
   }
@@ -91,6 +92,7 @@ export async function deleteUserAccountData(user: User): Promise<{ error?: strin
     }
 
     return {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error('Data cleanup failed:', err);
     return { error: err.message || 'Failed to clean up user data.' };
@@ -106,6 +108,7 @@ export async function reauthenticate(user: User, providerOrCredential: AuthProvi
       await reauthenticateWithPopup(user, providerOrCredential as AuthProvider);
     }
     return {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err.code === 'auth/wrong-password') {
       return { error: 'Incorrect password.' };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useProject } from '../layout';
 import { useAuth } from '@/contexts/auth-context';
 import { GlassCard } from '@/components';
@@ -15,7 +15,6 @@ import { type Task, type TaskStatus, type TaskPriority } from '@/types';
 import {
   PlusIcon,
   SearchIcon,
-  FilterIcon,
   CheckCircleIcon,
   CalendarIcon,
   ArrowUpIcon,
@@ -23,7 +22,6 @@ import {
   ArrowDownIcon,
   TrashIcon,
   EditIcon,
-  MoreVerticalIcon,
   XIcon,
 } from '@/components/icons';
 import { formatRelativeDate } from '@/utils';
@@ -36,11 +34,7 @@ const PRIORITY_CONFIG = {
   low: { label: 'Low', color: 'text-blue-400', bg: 'bg-blue-500/10', icon: ArrowDownIcon },
 };
 
-const STATUS_CONFIG = {
-  todo: { label: 'To Do', color: 'text-zinc-400', ring: 'ring-zinc-500/20' },
-  'in-progress': { label: 'In Progress', color: 'text-violet-400', ring: 'ring-violet-500/20' },
-  done: { label: 'Done', color: 'text-emerald-400', ring: 'ring-emerald-500/20' },
-};
+
 
 // ── Components ─────────────────────────────────────────────
 
@@ -188,6 +182,7 @@ export default function ProjectTasksPage() {
   // Subscribe to tasks
   useEffect(() => {
     if (!user || !project) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const unsubscribe = subscribeToProjectTasks(user.uid, project.id, (data, err) => {
       if (err) setError(err);
@@ -287,7 +282,6 @@ export default function ProjectTasksPage() {
         <div className="space-y-3">
           {filteredTasks.map((task) => {
             const priorityConfig = PRIORITY_CONFIG[task.priority];
-            const statusConfig = STATUS_CONFIG[task.status];
             const PIcon = priorityConfig.icon;
             
             return (

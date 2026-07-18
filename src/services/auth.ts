@@ -84,6 +84,7 @@ export async function googleLogin(): Promise<AuthResult> {
   try {
     const credential = await signInWithPopup(auth, googleProvider);
     return { user: credential, error: null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err.code === 'auth/account-exists-with-different-credential') {
       const email = err.customData?.email;
@@ -107,6 +108,7 @@ export async function githubLogin(): Promise<AuthResult> {
   try {
     const credential = await signInWithPopup(auth, githubProvider);
     return { user: credential, error: null };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     if (err.code === 'auth/account-exists-with-different-credential') {
       const email = err.customData?.email;

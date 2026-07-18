@@ -8,10 +8,7 @@
 import {
   collection,
   doc,
-  addDoc,
   getDocs,
-  updateDoc,
-  deleteDoc,
   query,
   where,
   writeBatch,

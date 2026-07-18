@@ -5,7 +5,6 @@
 import {
   collection,
   doc,
-  addDoc,
   getDocs,
   updateDoc,
   query,
@@ -49,7 +48,7 @@ function friendlyError(error: unknown): string {
 // ── CRUD ───────────────────────────────────────────────────
 
 export async function sendInvitationEmail(invite: ProjectInvite, token: string) {
-  // TODO: Integrate with an email service (Resend, SendGrid, etc.)
+  // Future enhancement: Integrate with an email service (Resend, SendGrid, etc.)
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
   const inviteUrl = `${baseUrl}/invite/${token}`;
 
@@ -60,7 +59,7 @@ export async function sendInvitationEmail(invite: ProjectInvite, token: string) 
   try {
     const { logToTerminal } = await import('@/actions/log');
     await logToTerminal(`\n✉️  [Email Service Mock] Invitation sent to ${invite.inviteeEmail}\n🔗 Acceptance link: ${inviteUrl}\n`);
-  } catch (e) {
+  } catch {
     // Ignore if server action fails
   }
   
@@ -283,8 +282,6 @@ export async function cancelInvite(
   actorUid: string,
 ): Promise<{ error?: string }> {
   try {
-    const { deleteDoc } = await import('firebase/firestore');
-    
     const batch = writeBatch(db);
     const inviteRef = doc(db, INVITES_COL, inviteId);
     batch.delete(inviteRef);

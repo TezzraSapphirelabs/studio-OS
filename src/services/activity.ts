@@ -8,8 +8,6 @@ import {
   query,
   where,
   onSnapshot,
-  orderBy,
-  limit,
   type DocumentData,
   type Unsubscribe,
 } from 'firebase/firestore';
@@ -18,6 +16,7 @@ import { type ProjectActivity } from '@/types';
 
 export const ACTIVITIES_COL = 'activities';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeDate(val: any): string {
   if (!val) return new Date().toISOString();
   if (typeof val === 'string') return val;

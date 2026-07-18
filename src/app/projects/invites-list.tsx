@@ -80,7 +80,7 @@ export default function InvitesList() {
               <div>
                 <h3 className="font-medium text-white">Project Invitation</h3>
                 <p className="mt-1 text-sm text-white/50">
-                  You've been invited as a <span className="text-white/80 font-medium capitalize">{invite.role}</span>.
+                  You&apos;ve been invited as a <span className="text-white/80 font-medium capitalize">{invite.role}</span>.
                 </p>
               </div>
             </div>
