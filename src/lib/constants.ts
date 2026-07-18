@@ -12,6 +12,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: 'grid' },
   { label: 'Projects', href: '/projects', icon: 'folder' },
   { label: 'Tasks', href: '/tasks', icon: 'check-square' },
+  { label: 'AI Workspace', href: '/ai', icon: 'ai' },
   { label: 'Settings', href: '/settings', icon: 'settings' },
 ];
 

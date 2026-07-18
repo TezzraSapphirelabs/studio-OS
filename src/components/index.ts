@@ -5,6 +5,7 @@
 export { GlassCard } from './glass-card';
 export { StatCard } from './stat-card';
 export { ProgressBar } from './progress-bar';
+export { Markdown } from './markdown';
 export { Sidebar } from './sidebar';
 export { TopBar } from './top-bar';
 export { AppShell } from './app-shell';
