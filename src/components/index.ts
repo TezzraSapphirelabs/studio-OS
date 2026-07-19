@@ -9,3 +9,4 @@ export { Markdown } from './markdown';
 export { Sidebar } from './sidebar';
 export { TopBar } from './top-bar';
 export { AppShell } from './app-shell';
+export { NoteEditor } from './note-editor';

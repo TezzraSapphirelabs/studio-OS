@@ -100,3 +100,14 @@ export interface ProjectActivity {
   target: string;
   createdAt: string; // ISO string
 }
+
+export interface Note {
+  id: string;
+  ownerId: string;
+  title: string;
+  content: string;
+  archived: boolean;
+  lastEditedBy: string;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}
