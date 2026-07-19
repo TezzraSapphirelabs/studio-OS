@@ -111,3 +111,29 @@ export interface Note {
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }
+
+export type EventPriority = 'low' | 'medium' | 'high';
+export type EventStatus = 'upcoming' | 'in-progress' | 'completed';
+
+export interface CalendarEvent {
+  id: string;
+  ownerId: string;
+  title: string;
+  description?: string;
+  date: string; // YYYY-MM-DD
+  startTime?: string | null; // HH:mm
+  endTime?: string | null; // HH:mm
+  isAllDay: boolean;
+  priority: EventPriority;
+  status: EventStatus;
+  projectId?: string;
+  archived: boolean;
+  reminders?: number[]; // minutes before event
+  recurrence?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    interval: number;
+    until?: string; // YYYY-MM-DD
+  };
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}

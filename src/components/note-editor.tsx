@@ -33,6 +33,7 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
         titleRef.current?.select();
       }, 100);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveChanges = useCallback(async (newTitle: string, newContent: string) => {

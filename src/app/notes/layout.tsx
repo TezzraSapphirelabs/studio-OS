@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useRouter, useParams, usePathname } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { AppShell } from '@/components/app-shell';
 import { useAuth } from '@/contexts/auth-context';
-import { subscribeToUserNotes, createNote, deleteNote } from '@/services/notes';
+import { subscribeToUserNotes, createNote } from '@/services/notes';
 import { type Note } from '@/types';
 import { 
   FileTextIcon, PlusIcon, SearchIcon, FilterIcon
