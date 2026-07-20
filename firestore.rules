@@ -102,6 +102,28 @@ service cloud.firestore {
       );
     }
 
+    match /files/{fileId} {
+      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
+      allow update: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+      );
+      allow delete: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+      );
+    }
+
+    match /folders/{folderId} {
+      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
+      allow update: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+      );
+      allow delete: if request.auth != null && (
+        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+      );
+    }
+
     match /projectInvites/{inviteId} {
       allow read: if request.auth != null && (
         request.auth.token.email == resource.data.inviteeEmail || isProjectMember(resource.data.projectId)

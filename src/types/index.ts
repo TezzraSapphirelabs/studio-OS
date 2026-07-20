@@ -137,3 +137,27 @@ export interface CalendarEvent {
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }
+
+export interface DriveFolder {
+  id: string;
+  projectId: string;
+  parentId: string | null;
+  name: string;
+  ownerUid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DriveFile {
+  id: string;
+  projectId: string;
+  folderId: string | null;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  storagePath: string;
+  ownerUid: string;
+  createdAt: string;
+  updatedAt: string;
+}
