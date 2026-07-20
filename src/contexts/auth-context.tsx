@@ -22,7 +22,7 @@ import {
   type LinkingData,
 } from '@/services/auth';
 import { syncUserProfile } from '@/services/db';
-import { type UserRole } from '@/types';
+import { type UserRole, type UserProfile } from '@/types';
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -31,6 +31,8 @@ interface AuthContextValue {
   user: User | null;
   /** The user's role from Firestore, or `null` if not synced or logged out. */
   userRole: UserRole | null;
+  /** The full user profile from Firestore, or `null`. */
+  userProfile: UserProfile | null;
   /** Any error encountered while fetching the user role (e.g., offline). */
   roleError: string | null;
   /** `true` while the role is being fetched. */
@@ -72,6 +74,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -84,6 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await syncUserProfile(auth.currentUser);
       setUserRole(profile.role);
+      setUserProfile(profile);
       
       // Apply Theme
       if (typeof window !== 'undefined') {
@@ -119,6 +123,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const profile = await syncUserProfile(firebaseUser);
           setUserRole(profile.role);
+          setUserProfile(profile);
           
           // Apply Theme
           if (typeof window !== 'undefined') {
@@ -145,6 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         setUserRole(null);
+        setUserProfile(null);
         setRoleError(null);
       }
       setLoading(false);
@@ -256,6 +262,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextValue = {
     user,
     userRole,
+    userProfile,
     roleError,
     roleLoading,
     loading,

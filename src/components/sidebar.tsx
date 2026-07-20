@@ -19,7 +19,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, userProfile, logout } = useAuth();
 
   return (
     <>
@@ -106,13 +106,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-xs font-bold text-white">
-                {getInitials(user?.displayName, user?.email)}
+                {getInitials(userProfile?.displayName || user?.displayName, user?.email)}
               </div>
             )}
             
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm font-medium text-white">
-                {getDisplayName(user)}
+                {userProfile?.displayName || getDisplayName(user)}
               </p>
               <p className="truncate text-xs text-white/40">
                 {user?.email || ''}

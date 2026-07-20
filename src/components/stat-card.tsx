@@ -12,11 +12,12 @@ interface StatCardProps {
   trend?: string;
   trendUp?: boolean;
   accentColor?: string;
+  href?: string;
 }
 
-export function StatCard({ label, value, icon, trend, trendUp, accentColor = '#8b5cf6' }: StatCardProps) {
+export function StatCard({ label, value, icon, trend, trendUp, accentColor = '#8b5cf6', href }: StatCardProps) {
   return (
-    <GlassCard hover padding="md">
+    <GlassCard href={href} hover padding="md">
       {/* Accent glow */}
       <div
         className="absolute -top-12 -right-12 h-32 w-32 rounded-full opacity-20 blur-3xl"
