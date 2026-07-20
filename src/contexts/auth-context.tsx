@@ -84,6 +84,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const profile = await syncUserProfile(auth.currentUser);
       setUserRole(profile.role);
+      
+      // Apply Theme
+      if (typeof window !== 'undefined') {
+        const theme = profile.themePreference || 'dark';
+        const html = document.documentElement;
+        if (theme === 'light') {
+          html.classList.remove('dark');
+        } else if (theme === 'dark') {
+          html.classList.add('dark');
+        } else if (theme === 'system') {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.classList.add('dark');
+          } else {
+            html.classList.remove('dark');
+          }
+        }
+      }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to sync user profile", error);
@@ -102,6 +119,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const profile = await syncUserProfile(firebaseUser);
           setUserRole(profile.role);
+          
+          // Apply Theme
+          if (typeof window !== 'undefined') {
+            const theme = profile.themePreference || 'dark';
+            const html = document.documentElement;
+            if (theme === 'light') {
+              html.classList.remove('dark');
+            } else if (theme === 'dark') {
+              html.classList.add('dark');
+            } else if (theme === 'system') {
+              if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.classList.add('dark');
+              } else {
+                html.classList.remove('dark');
+              }
+            }
+          }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           console.error("Failed to sync user profile", error);

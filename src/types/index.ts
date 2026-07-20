@@ -10,6 +10,16 @@ export interface UserProfile {
   displayName: string;
   role: UserRole;
   photoURL: string | null;
+  bio?: string;
+  themePreference?: 'dark' | 'light' | 'system';
+  notificationPreferences?: {
+    email: boolean;
+    inApp: boolean;
+    mentions: boolean;
+    projects: boolean;
+    tasks: boolean;
+    comments: boolean;
+  };
   lastActive?: string;
   isOnline?: boolean;
   createdAt: string;
@@ -215,6 +225,19 @@ export interface Comment {
   authorName: string;
   authorPhotoURL: string | null;
   content: string; // can contain mentions like `@username`
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}
+
+export interface WorkspaceSettings {
+  id: string; // ownerUid
+  name: string;
+  description: string;
+  logoUrl: string | null;
+  timezone: string;
+  defaultLanguage: string;
+  dateFormat: string;
+  timeFormat: string;
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }

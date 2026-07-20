@@ -39,17 +39,22 @@ service cloud.firestore {
       return getProjectRole(projectId) in allowedRoles;
     }
 
-    // Safe for queries: avoids string concatenation inside get() paths which breaks the Firestore query planner
-    function isProjectMember(projectId) {
-      return exists(/databases/$(database)/documents/projects/$(projectId)) && (
-        get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid ||
-        ('memberUids' in get(/databases/$(database)/documents/projects/$(projectId)).data && request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.memberUids)
-      );
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
+    // ── Helper: Check if user is a member of a project ──
+    function isProjectMember(projectId) {
+      let isOwner = get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid;
+      let isMember = request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.memberUids;
+      return isOwner || isMember;
+    }
+
+    // ── Helper: Check if user is a member of a workspace ──
     function isWorkspaceMember(workspaceId) {
-      return request.auth.uid == workspaceId ||
-             exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + "_" + request.auth.uid));
+      let isOwner = workspaceId == request.auth.uid;
+      let isMember = exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid));
+      return isOwner || isMember;
     }
 
     match /projects/{projectId} {
@@ -188,6 +193,12 @@ service cloud.firestore {
         request.resource.data.authorId == request.auth.uid
       );
       allow update, delete: if request.auth != null && resource.data.authorId == request.auth.uid;
+    }
+    // ── Workspaces ─────────────────────────────────────────────
+    // Note: workspaceId is currently the ownerUid
+    match /workspaces/{workspaceId} {
+      allow read: if isAuthenticated() && isWorkspaceMember(workspaceId);
+      allow write: if isAuthenticated() && workspaceId == request.auth.uid;
     }
   }
 }
