@@ -4,6 +4,7 @@
 
 import React from 'react';
 
+
 import Link from 'next/link';
 
 interface GlassCardProps {
@@ -12,6 +13,7 @@ interface GlassCardProps {
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   href?: string;
+  onClick?: () => void;
 }
 
 const paddingMap = {
@@ -21,7 +23,7 @@ const paddingMap = {
   lg: 'p-8',
 };
 
-export function GlassCard({ children, className = '', hover = false, padding = 'md', href }: GlassCardProps) {
+export function GlassCard({ children, className = '', hover = false, padding = 'md', href, onClick }: GlassCardProps) {
   const classes = `
         relative overflow-hidden rounded-2xl
         border border-white/[0.08]
@@ -37,6 +39,14 @@ export function GlassCard({ children, className = '', hover = false, padding = '
       <Link href={href} className={`block ${classes}`}>
         {children}
       </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`block w-full text-left ${classes}`}>
+        {children}
+      </button>
     );
   }
 
