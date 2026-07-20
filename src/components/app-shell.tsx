@@ -7,12 +7,24 @@
 import React, { useState } from 'react';
 import { Sidebar } from './sidebar';
 import { TopBar } from './top-bar';
+import { useAuth } from '@/contexts/auth-context';
+import { startPresencePing } from '@/services/presence';
+
+function PresenceManager({ userId }: { userId: string }) {
+  React.useEffect(() => {
+    const cleanup = startPresencePing(userId);
+    return cleanup;
+  }, [userId]);
+  return null;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#07070a]">
+      {user && <PresenceManager userId={user.uid} />}
       {/* Ambient background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute -top-[40%] left-[20%] h-[600px] w-[600px] rounded-full bg-violet-600/[0.07] blur-[128px]" />

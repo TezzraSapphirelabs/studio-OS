@@ -6,6 +6,7 @@ import { updateNote } from '@/services/notes';
 import { Markdown } from './markdown';
 import { ArchiveIcon, ArchiveRestoreIcon, ClockIcon } from './icons';
 import { useToast } from '@/contexts/toast-context';
+import { CommentSection } from './comments/CommentSection';
 
 interface NoteEditorProps {
   note: Note;
@@ -15,7 +16,7 @@ interface NoteEditorProps {
 export function NoteEditor({ note, userId }: NoteEditorProps) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
-  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'comments'>('edit');
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -136,6 +137,12 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
             >
               Preview
             </button>
+            <button
+              onClick={() => setActiveTab('comments')}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'comments' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-white/40 hover:text-white/80'}`}
+            >
+              Comments
+            </button>
           </div>
           
           <button
@@ -159,7 +166,7 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
             className="absolute inset-0 w-full h-full p-6 bg-transparent text-white/80 resize-none focus:outline-none leading-relaxed"
             spellCheck="false"
           />
-        ) : (
+        ) : activeTab === 'preview' ? (
           <div className="absolute inset-0 w-full h-full p-6 overflow-y-auto">
             {content ? (
               <Markdown content={content} />
@@ -167,7 +174,11 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
               <div className="text-white/20 italic text-sm">Nothing to preview.</div>
             )}
           </div>
-        )}
+        ) : activeTab === 'comments' ? (
+          <div className="absolute inset-0 w-full h-full p-6 overflow-y-auto">
+            <CommentSection entityId={note.id} entityType="note" projectId={note.ownerId} />
+          </div>
+        ) : null}
       </div>
       
       {/* Footer Info */}

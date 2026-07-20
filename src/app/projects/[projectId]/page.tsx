@@ -6,6 +6,7 @@ import { GlassCard, ProgressBar } from '@/components';
 import { getCompletionPercent, formatRelativeDate } from '@/utils';
 import { FolderIcon, CheckSquareIcon } from '@/components/icons';
 import Link from 'next/link';
+import { CommentSection } from '@/components/comments/CommentSection';
 
 export default function ProjectOverviewPage() {
   const { project, loading, error } = useProject();
@@ -77,6 +78,10 @@ export default function ProjectOverviewPage() {
           </Link>
         </div>
       </GlassCard>
+
+      <div className="pt-4">
+        <CommentSection entityId={project.id} entityType="project" projectId={project.id} />
+      </div>
     </div>
   );
 }

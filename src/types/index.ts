@@ -10,6 +10,8 @@ export interface UserProfile {
   displayName: string;
   role: UserRole;
   photoURL: string | null;
+  lastActive?: string;
+  isOnline?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -94,7 +96,8 @@ export interface DashboardStats {
 
 export interface ProjectActivity {
   id: string;
-  projectId: string;
+  projectId: string; // Used as workspaceId for workspace-level events
+  workspaceId?: string; // Optional for backward compatibility, will be populated going forward
   ownerUid: string;
   action: string;
   target: string;
@@ -160,4 +163,58 @@ export interface DriveFile {
   ownerUid: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// ── Phase 6 Extensions ─────────────────────────────────────
+
+export type WorkspaceRole = 'owner' | 'admin' | 'member' | 'viewer';
+
+export interface WorkspaceMember {
+  id: string; // `${workspaceId}_${userId}`
+  workspaceId: string; // The ownerUid of the workspace
+  userId: string;
+  email: string;
+  displayName: string;
+  photoURL: string | null;
+  role: WorkspaceRole;
+  joinedAt: string;
+}
+
+export interface WorkspaceInvite {
+  id: string;
+  workspaceId: string;
+  inviterUid: string;
+  inviteeEmail: string;
+  role: WorkspaceRole;
+  status: InviteStatus;
+  token?: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type NotificationType = 'task_assigned' | 'mention' | 'invite_accepted' | 'project_update' | 'file_uploaded' | 'workspace_event';
+
+export interface Notification {
+  id: string;
+  userId: string; // The user receiving the notification
+  type: NotificationType;
+  title: string;
+  message: string;
+  link?: string; // e.g. `/projects/123/tasks/456`
+  read: boolean;
+  createdAt: string; // ISO string
+}
+
+export interface Comment {
+  id: string;
+  projectId?: string; // Included for easier security rule verification
+  entityId: string; // projectId, taskId, or noteId
+  entityType: 'project' | 'task' | 'note';
+  authorId: string;
+  authorName: string;
+  authorPhotoURL: string | null;
+  content: string; // can contain mentions like `@username`
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }

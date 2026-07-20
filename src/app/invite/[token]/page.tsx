@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { acceptInviteByToken } from '@/services/invites';
+import { acceptWorkspaceInviteByToken } from '@/services/workspace';
 import { GlassCard } from '@/components';
 import { useToast } from '@/contexts/toast-context';
 
@@ -26,16 +27,37 @@ export default function InviteLandingPage() {
 
     async function processInvite() {
       setStatus('verifying');
-      const { projectId, error } = await acceptInviteByToken(token, user!.uid, user!.email || '');
       
-      if (error) {
+      // Try project invite first
+      let res = await acceptInviteByToken(token, user!.uid, user!.email || '');
+      
+      if (res.error && res.error.includes('Invalid')) {
+        // Fallback to workspace invite
+        const workspaceRes = await acceptWorkspaceInviteByToken(token, user!.uid, user!.email || '');
+        if (workspaceRes.workspaceId) {
+          setStatus('success');
+          toast('Successfully joined the workspace!', 'success');
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 1500);
+          return;
+        } else {
+          res = workspaceRes; // Let it fail with the workspace error
+        }
+      }
+
+      if (res.error) {
         setStatus('error');
-        setErrorMsg(error);
+        setErrorMsg(res.error);
       } else {
         setStatus('success');
-        toast('Successfully joined the project!', 'success');
+        toast('Successfully joined!', 'success');
         setTimeout(() => {
-          router.push(`/projects/${projectId}`);
+          if (res.projectId) {
+            router.push(`/projects/${res.projectId}`);
+          } else {
+            router.push('/dashboard');
+          }
         }, 1500);
       }
     }

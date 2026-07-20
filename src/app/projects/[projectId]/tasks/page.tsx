@@ -25,6 +25,7 @@ import {
   XIcon,
 } from '@/components/icons';
 import { formatRelativeDate } from '@/utils';
+import { CommentSection } from '@/components/comments/CommentSection';
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -149,6 +150,12 @@ function TaskModal({
             </button>
           </div>
         </form>
+
+        {task && (
+          <div className="mt-8">
+            <CommentSection entityId={task.id} entityType="task" projectId={projectId} />
+          </div>
+        )}
       </div>
     </div>
   );
