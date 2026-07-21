@@ -15,6 +15,8 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Notes', href: '/notes', icon: 'file-text' },
   { label: 'Calendar', href: '/calendar', icon: 'calendar' },
   { label: 'Files', href: '/files', icon: 'files' },
+  { label: 'Analytics', href: '/analytics', icon: 'trending-up' },
+  { label: 'Tags', href: '/tags', icon: 'tag' },
   { label: 'AI Workspace', href: '/ai', icon: 'ai' },
   { label: 'Team', href: '/team', icon: 'users' },
   { label: 'Settings', href: '/settings', icon: 'settings' },

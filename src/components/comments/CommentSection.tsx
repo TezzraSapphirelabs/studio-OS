@@ -22,10 +22,10 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!entityId) return;
-    const unsub = subscribeToComments(entityId, setComments, setError);
+    if (!entityId || !projectId) return;
+    const unsub = subscribeToComments(entityId, projectId, setComments, setError);
     return () => { unsub.then(u => u()); };
-  }, [entityId]);
+  }, [entityId, projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

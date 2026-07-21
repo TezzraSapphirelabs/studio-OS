@@ -40,11 +40,13 @@ function docToComment(id: string, data: DocumentData): Comment {
 
 export function subscribeToComments(
   entityId: string,
+  projectId: string,
   onUpdate: (comments: Comment[]) => void,
   onError: (error: string) => void
 ) {
   const q = query(
     collection(db, COMMENTS_COL),
+    where('projectId', '==', projectId),
     where('entityId', '==', entityId),
     orderBy('createdAt', 'asc')
   );

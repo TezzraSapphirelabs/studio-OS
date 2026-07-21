@@ -4,9 +4,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { GlassCard } from '@/components';
 import { PlusIcon, CheckSquareIcon, SearchIcon } from '@/components/icons';
 import { TASK_STATUS_LABELS, PRIORITY_COLORS } from '@/lib/constants';
-import type { Task, Project, TaskStatus, TaskPriority } from '@/types';
+import type { Task, Project, TaskStatus, TaskPriority, Tag } from '@/types';
 import { useAuth } from '@/contexts/auth-context';
 import { subscribeToProjects } from '@/services/projects';
+import { subscribeToTags } from '@/services/tags';
 import { useAllProjectsTasks } from '@/hooks';
 import { TaskModal, TaskDrawer } from '@/components';
 import { createTask, updateTask, deleteTask } from '@/services/tasks';
@@ -16,10 +17,12 @@ const STATUSES = ['all', 'todo', 'in-progress', 'done'] as const;
 export default function TasksPage() {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const { tasks, loading: tasksLoading, error } = useAllProjectsTasks(user?.uid, projects);
 
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,23 +31,25 @@ export default function TasksPage() {
 
   useEffect(() => {
     if (!user) return;
-    const unsub = subscribeToProjects(
+    const unsubP = subscribeToProjects(
       user.uid,
       (data) => setProjects(data),
       (err) => console.error('Failed to load projects:', err)
     );
-    return () => unsub();
+    const unsubT = subscribeToTags(user.uid, setTags);
+    return () => { unsubP(); unsubT(); };
   }, [user]);
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(task => {
       const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
       const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
+      const matchesTag = tagFilter === 'all' || (task.tags && task.tags.includes(tagFilter));
       const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             task.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesPriority && matchesSearch;
+      return matchesStatus && matchesPriority && matchesTag && matchesSearch;
     });
-  }, [tasks, statusFilter, priorityFilter, searchQuery]);
+  }, [tasks, statusFilter, priorityFilter, tagFilter, searchQuery]);
 
   const getProjectName = (projectId: string) =>
     projects.find((p) => p.id === projectId)?.name || 'Unknown';
@@ -162,6 +167,18 @@ export default function TasksPage() {
             <option value="medium" className="bg-[#0f0f13]">Medium</option>
             <option value="low" className="bg-[#0f0f13]">Low</option>
           </select>
+
+          {/* Tag filter */}
+          <select 
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="rounded-lg border border-white/10 bg-transparent px-3 py-1.5 text-xs font-medium text-white/40 outline-none transition-colors hover:bg-white/[0.04] focus:border-violet-500 focus:text-white"
+          >
+            <option value="all" className="bg-[#0f0f13]">All Tags</option>
+            {tags.map(t => (
+              <option key={t.id} value={t.name} className="bg-[#0f0f13]">{t.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="relative w-full sm:w-64">
@@ -257,11 +274,21 @@ export default function TasksPage() {
                   >
                     {getProjectName(task.projectId)}
                   </span>
-                  {task.tags && task.tags.map((tag) => (
-                    <span key={tag} className="rounded bg-white/[0.04] px-1.5 py-0.5 text-[10px] text-white/30">
-                      {tag}
-                    </span>
-                  ))}
+                  {task.tags && task.tags.map((tagName) => {
+                    const tagObj = tags.find(t => t.name === tagName);
+                    return (
+                      <span 
+                        key={tagName} 
+                        className="rounded px-1.5 py-0.5 text-[10px]"
+                        style={{
+                          backgroundColor: tagObj ? `${tagObj.color}20` : 'rgba(255,255,255,0.04)',
+                          color: tagObj ? tagObj.color : 'rgba(255,255,255,0.3)'
+                        }}
+                      >
+                        {tagName}
+                      </span>
+                    );
+                  })}
                   {task.dueDate && (
                     <span className="text-[10px] text-white/30">
                       Due: {new Date(task.dueDate).toLocaleDateString()}
@@ -309,6 +336,7 @@ export default function TasksPage() {
         onClose={() => { setIsDrawerOpen(false); setSelectedTask(null); }}
         task={selectedTask}
         project={projects.find(p => p.id === selectedTask?.projectId) || null}
+        tags={tags}
         onEdit={handleEditClick}
         onDelete={handleDeleteTask}
       />

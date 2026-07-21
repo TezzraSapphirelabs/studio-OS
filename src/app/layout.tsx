@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/auth-context';
 import { ToastProvider } from '@/contexts/toast-context';
+import { SearchProvider } from '@/contexts/search-context';
 import './globals.css';
 
 const inter = Inter({
@@ -25,7 +26,11 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} dark antialiased`}>
       <body className="min-h-screen bg-background text-foreground">
         <ToastProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <SearchProvider>
+              {children}
+            </SearchProvider>
+          </AuthProvider>
         </ToastProvider>
       </body>
     </html>

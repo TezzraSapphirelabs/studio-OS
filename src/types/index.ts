@@ -90,6 +90,17 @@ export interface Task {
   updatedAt: string; // ISO string
 }
 
+export interface Tag {
+  id: string;
+  workspaceId: string; // The ownerUid of the workspace this tag belongs to
+  name: string;
+  color: string;
+  priority?: boolean;
+  status?: boolean;
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
+}
+
 export interface NavItem {
   label: string;
   href: string;

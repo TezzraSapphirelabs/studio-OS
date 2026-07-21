@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { XIcon, CalendarIcon, UserIcon, TagIcon, EditIcon, TrashIcon, CheckSquareIcon } from '@/components/icons';
-import type { Task, Project } from '@/types';
+import type { Task, Project, Tag } from '@/types';
 import { TASK_STATUS_LABELS, PRIORITY_COLORS } from '@/lib/constants';
 
 interface TaskDrawerProps {
@@ -10,11 +10,12 @@ interface TaskDrawerProps {
   onClose: () => void;
   task: Task | null;
   project: Project | null;
+  tags?: Tag[];
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export function TaskDrawer({ isOpen, onClose, task, project, onEdit, onDelete }: TaskDrawerProps) {
+export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, onDelete }: TaskDrawerProps) {
   if (!isOpen || !task) return null;
 
   return (
@@ -131,12 +132,23 @@ export function TaskDrawer({ isOpen, onClose, task, project, onEdit, onDelete }:
               <div className="mb-8">
                 <h3 className="mb-3 text-sm font-semibold text-white">Labels</h3>
                 <div className="flex flex-wrap gap-2">
-                  {task.tags.map((tag) => (
-                    <span key={tag} className="flex items-center gap-1.5 rounded-lg border border-white/5 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-white/60">
-                      <TagIcon size={12} className="text-white/30" />
-                      {tag}
-                    </span>
-                  ))}
+                  {task.tags.map((tagName) => {
+                    const tagObj = tags.find(t => t.name === tagName);
+                    return (
+                      <span 
+                        key={tagName} 
+                        className="flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium"
+                        style={{
+                          backgroundColor: tagObj ? `${tagObj.color}10` : 'rgba(255,255,255,0.04)',
+                          borderColor: tagObj ? `${tagObj.color}40` : 'rgba(255,255,255,0.05)',
+                          color: tagObj ? tagObj.color : 'rgba(255,255,255,0.6)'
+                        }}
+                      >
+                        <TagIcon size={12} style={{ color: tagObj ? tagObj.color : 'rgba(255,255,255,0.3)' }} />
+                        {tagName}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             )}
