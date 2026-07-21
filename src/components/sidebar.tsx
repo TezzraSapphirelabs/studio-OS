@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, APP_NAME } from '@/lib/constants';
 import { iconMap, LogOutIcon, XIcon } from './icons';
@@ -98,11 +99,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="border-t border-white/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl p-2">
             {user?.photoURL ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img 
+              <Image 
                 src={user.photoURL} 
                 alt="Profile" 
+                width={36}
+                height={36}
                 className="h-9 w-9 rounded-full object-cover border border-white/[0.08]"
+                unoptimized
               />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-xs font-bold text-white">

@@ -9,8 +9,11 @@ import { useAuth } from '@/contexts/auth-context';
 import { subscribeToProjects } from '@/services/projects';
 import { subscribeToTags } from '@/services/tags';
 import { useAllProjectsTasks } from '@/hooks';
-import { TaskModal, TaskDrawer } from '@/components';
 import { createTask, updateTask, deleteTask } from '@/services/tasks';
+import dynamic from 'next/dynamic';
+
+const TaskModal = dynamic(() => import('@/components/tasks/task-modal').then(m => m.TaskModal), { ssr: false });
+const TaskDrawer = dynamic(() => import('@/components/tasks/task-drawer').then(m => m.TaskDrawer), { ssr: false });
 
 const STATUSES = ['all', 'todo', 'in-progress', 'done'] as const;
 
@@ -90,6 +93,7 @@ export default function TasksPage() {
       const { error } = await createTask(user.uid, data.projectId, data);
       if (error) throw new Error(error);
     }
+    setIsModalOpen(false);
   };
 
   const handleDeleteTask = async () => {

@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/auth-context';
 import Link from 'next/link';
 import { subscribeToProjects } from '@/services/projects';
 import { subscribeToWorkspaceActivity } from '@/services/activity';
+import { fetchWorkspaceMembers } from '@/services/workspace';
 import { type Project, type ProjectActivity } from '@/types';
 import { useAllProjectsTasks } from '@/hooks/use-tasks';
 
@@ -19,6 +20,7 @@ export default function DashboardPage() {
   
   const [recentActivity, setRecentActivity] = useState<ProjectActivity[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [memberMap, setMemberMap] = useState<Record<string, string>>({});
 
   const { tasks, loading: tasksLoading } = useAllProjectsTasks(user?.uid, projects);
 
@@ -46,6 +48,15 @@ export default function DashboardPage() {
         setActivityLoading(false);
       }
     );
+
+    // Fetch workspace members to resolve real names for activity feed
+    fetchWorkspaceMembers(user.uid).then(({ members }) => {
+      if (members) {
+        const map: Record<string, string> = {};
+        members.forEach(m => map[m.userId] = m.displayName);
+        setMemberMap(map);
+      }
+    });
 
     return () => {
       unsubProjects();
@@ -371,7 +382,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-white/60">
                           {/* If the activity user is known or just a name */}
                           <span className="font-medium text-white/80">
-                            {activity.ownerUid === user?.uid ? getDisplayName(user) : 'A member'}
+                            {activity.ownerUid === user?.uid ? getDisplayName(user) : (memberMap[activity.ownerUid] || 'A member')}
                           </span>{' '}
                           {activity.action}{' '}
                           <span className="font-medium text-white/80">{activity.target}</span>

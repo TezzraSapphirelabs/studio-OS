@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { validateAccountDeletion, deleteUserAccountData, reauthenticate } from '@/services/account';
 import { EmailAuthProvider, GoogleAuthProvider } from 'firebase/auth';
+import Image from 'next/image';
 
 export default function DeleteAccountModal({
   isOpen,
@@ -181,8 +182,7 @@ export default function DeleteAccountModal({
                   disabled={loading}
                   className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.08]"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="h-5 w-5" />
+                  <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={20} height={20} className="h-5 w-5" unoptimized />
                   {loading ? 'Deleting...' : 'Sign in with Google to Delete'}
                 </button>
               )}

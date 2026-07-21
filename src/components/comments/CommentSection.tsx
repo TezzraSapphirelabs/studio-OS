@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { subscribeToComments, createComment, deleteComment } from '@/services/comments';
 import { type Comment } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import Image from 'next/image';
 import { TrashIcon } from '@/components/icons';
 import { getInitials } from '@/utils';
 
@@ -75,8 +76,7 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
               <div key={comment.id} className="flex gap-3 group">
                 <div className="shrink-0 mt-0.5">
                   {comment.authorPhotoURL ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={comment.authorPhotoURL} alt={comment.authorName} className="h-8 w-8 rounded-full object-cover" />
+                    <Image src={comment.authorPhotoURL} alt={comment.authorName} width={32} height={32} className="h-8 w-8 rounded-full object-cover" unoptimized />
                   ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 text-xs font-bold text-white shadow-inner">
                       {getInitials(comment.authorName, '')}

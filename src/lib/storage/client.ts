@@ -25,7 +25,7 @@ export function uploadFileToStorage(
       activeXhr.open('POST', '/api/storage/upload', true);
       
       // We pass the key and content type via headers to the API route
-      activeXhr.setRequestHeader('x-file-key', key);
+      activeXhr.setRequestHeader('x-file-key', encodeURIComponent(key));
       activeXhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
       
       if (onProgress) {

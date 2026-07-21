@@ -12,3 +12,4 @@ export { AppShell } from './app-shell';
 export { NoteEditor } from './note-editor';
 export { TaskModal } from './tasks/task-modal';
 export { TaskDrawer } from './tasks/task-drawer';
+export { ErrorBoundary } from './error-boundary';

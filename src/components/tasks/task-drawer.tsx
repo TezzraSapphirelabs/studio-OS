@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { XIcon, CalendarIcon, UserIcon, TagIcon, EditIcon, TrashIcon, CheckSquareIcon } from '@/components/icons';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { CommentSection } from '@/components/comments/CommentSection';
 import type { Task, Project, Tag } from '@/types';
 import { TASK_STATUS_LABELS, PRIORITY_COLORS } from '@/lib/constants';
 
@@ -19,7 +21,7 @@ export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, 
   if (!isOpen || !task) return null;
 
   return (
-    <>
+    <ErrorBoundary>
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity"
@@ -153,13 +155,13 @@ export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, 
               </div>
             )}
 
-            {/* Placeholder for Comments / Activity */}
-            <div className="mt-8 rounded-xl border border-white/5 bg-white/[0.02] p-6 text-center">
-              <p className="text-sm text-white/40">Comments and Activity coming in Step 2</p>
+            {/* Comments / Activity */}
+            <div className="mt-8">
+              <CommentSection entityId={task.id} entityType="task" projectId={task.projectId} />
             </div>
           </div>
         </div>
       </div>
-    </>
+    </ErrorBoundary>
   );
 }

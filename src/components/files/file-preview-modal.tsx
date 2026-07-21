@@ -1,10 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import React from 'react';
 import type { DriveFile } from '@/types';
 import { XIcon, DownloadIcon } from '@/components/icons';
 import { formatBytes } from '@/utils';
+import Image from 'next/image';
 
 interface FilePreviewModalProps {
   file: DriveFile;
@@ -20,11 +21,15 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
   const renderPreview = () => {
     if (file.type.startsWith('image/')) {
       return (
-        <img
-          src={file.url}
-          alt={file.name}
-          className="max-h-full max-w-full object-contain rounded-lg shadow-2xl"
-        />
+        <div className="relative h-full w-full">
+          <Image
+            src={file.url}
+            alt={file.name}
+            fill
+            className="object-contain rounded-lg shadow-2xl"
+            unoptimized
+          />
+        </div>
       );
     }
     

@@ -259,10 +259,10 @@ export default function FilesPage() {
                 disabled={projects.length === 0}
               >
                 {projects.length === 0 ? (
-                  <option value="">No projects found</option>
+                  <option value="" className="bg-[#0f0f13]">No projects found</option>
                 ) : (
                   projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                    <option key={p.id} value={p.id} className="bg-[#0f0f13]">{p.name}</option>
                   ))
                 )}
               </select>
@@ -303,9 +303,9 @@ export default function FilesPage() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="h-9 px-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-sm text-white/70 focus:outline-none cursor-pointer"
           >
-            <option value="all">All Types</option>
-            <option value="image">Images</option>
-            <option value="document">Documents</option>
+            <option value="all" className="bg-[#0f0f13]">All Types</option>
+            <option value="image" className="bg-[#0f0f13]">Images</option>
+            <option value="document" className="bg-[#0f0f13]">Documents</option>
           </select>
           
           <button 

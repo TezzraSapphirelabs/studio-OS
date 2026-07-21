@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GlassCard, ProgressBar } from '@/components';
 import { FolderIcon, PlusIcon, SearchIcon, EditIcon, ArchiveIcon, ArchiveRestoreIcon, TrashIcon, MoreVerticalIcon, XIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
 import {
-  fetchProjects,
+  subscribeToProjects,
   createProject,
   updateProject,
   archiveProject,
@@ -307,29 +307,21 @@ export default function ProjectsPage() {
     }
   }, [toast]);
 
-  // Fetch projects
-  const loadProjects = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    setError(null);
-    const result = await fetchProjects(user.uid);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      setProjects(result.projects || []);
-    }
-    setLoading(false);
-  }, [user]);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadProjects(); }, [loadProjects]);
-
-  // Auto-retry on reconnect
   useEffect(() => {
-    const handleOnline = () => { if (error) loadProjects(); };
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [error, loadProjects]);
+    if (!user) return;
+    const unsub = subscribeToProjects(
+      user.uid,
+      (data) => {
+        setProjects(data);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err);
+        setLoading(false);
+      }
+    );
+    return () => unsub();
+  }, [user]);
 
   // Filtered + searched projects
   const filteredProjects = useMemo(() => {
@@ -353,7 +345,6 @@ export default function ProjectsPage() {
     if (result.error) {
       setToast({ type: 'error', text: result.error });
     } else if (result.project) {
-      setProjects((prev) => [result.project!, ...prev]);
       setShowModal(false);
       setToast({ type: 'success', text: `"${result.project.name}" created!` });
     }
@@ -367,11 +358,6 @@ export default function ProjectsPage() {
     if (result.error) {
       setToast({ type: 'error', text: result.error });
     } else {
-      setProjects((prev) => prev.map((p) =>
-        p.id === editingProject.id
-          ? { ...p, name: input.name, description: input.description, color: input.color, updatedAt: new Date().toISOString() }
-          : p
-      ));
       setEditingProject(null);
       setToast({ type: 'success', text: 'Project updated!' });
     }
@@ -383,7 +369,6 @@ export default function ProjectsPage() {
     if (result.error) {
       setToast({ type: 'error', text: result.error });
     } else {
-      setProjects((prev) => prev.map((p) => p.id === project.id ? { ...p, status: 'archived' as const, updatedAt: new Date().toISOString() } : p));
       setToast({ type: 'success', text: `"${project.name}" archived.` });
     }
   }
@@ -394,7 +379,6 @@ export default function ProjectsPage() {
     if (result.error) {
       setToast({ type: 'error', text: result.error });
     } else {
-      setProjects((prev) => prev.map((p) => p.id === project.id ? { ...p, status: 'active' as const, updatedAt: new Date().toISOString() } : p));
       setToast({ type: 'success', text: `"${project.name}" unarchived.` });
     }
   }
@@ -407,7 +391,6 @@ export default function ProjectsPage() {
     if (result.error) {
       setToast({ type: 'error', text: result.error });
     } else {
-      setProjects((prev) => prev.filter((p) => p.id !== deletingProject.id));
       setToast({ type: 'success', text: `"${deletingProject.name}" deleted.` });
     }
     setDeletingProject(null);
@@ -485,7 +468,7 @@ export default function ProjectsPage() {
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : error ? (
-        <ErrorState message={error} onRetry={loadProjects} />
+        <ErrorState message={error} onRetry={() => window.location.reload()} />
       ) : projects.length === 0 ? (
         <EmptyState onCreateNew={() => setShowModal(true)} />
       ) : filteredProjects.length === 0 ? (

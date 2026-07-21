@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
 import React from 'react';
@@ -12,6 +12,7 @@ import {
   MoreVerticalIcon,
 } from '@/components/icons';
 import { formatBytes } from '@/utils';
+import Image from 'next/image';
 
 interface FileGridProps {
   folders: DriveFolder[];
@@ -69,8 +70,8 @@ export function FileGrid({
           onContextMenu={(e) => onContextMenu(e, file, 'file')}
         >
           {file.type.startsWith('image/') ? (
-            <div className="mb-3 h-16 w-full overflow-hidden rounded-lg">
-              <img src={file.url} alt={file.name} className="h-full w-full object-cover" />
+            <div className="relative mb-3 h-16 w-full overflow-hidden rounded-lg">
+              <Image src={file.url} alt={file.name} fill className="object-cover" unoptimized />
             </div>
           ) : (
             <div className="mb-3 flex h-16 items-center justify-center">

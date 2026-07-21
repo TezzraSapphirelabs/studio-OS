@@ -5,7 +5,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { subscribeToProjects } from '@/services/projects';
 import { useAllProjectsTasks } from '@/hooks/use-tasks';
 import { subscribeToWorkspaceActivity } from '@/services/activity';
+import { fetchWorkspaceMembers } from '@/services/workspace';
 import { StatCard, GlassCard, ProgressBar } from '@/components';
+import { ErrorBoundary } from '@/components/error-boundary';
 import Link from 'next/link';
 import { 
   FolderIcon, 
@@ -25,6 +27,7 @@ export default function AnalyticsPage() {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState<ProjectActivity[]>([]);
   const [activityLoading, setActivityLoading] = useState(true);
+  const [memberMap, setMemberMap] = useState<Record<string, string>>({});
 
   const { tasks, loading: tasksLoading } = useAllProjectsTasks(user?.uid, projects);
 
@@ -50,6 +53,15 @@ export default function AnalyticsPage() {
         setActivityLoading(false);
       }
     );
+
+    // Fetch workspace members to resolve real names for activity feed
+    fetchWorkspaceMembers(user.uid).then(({ members }) => {
+      if (members) {
+        const map: Record<string, string> = {};
+        members.forEach(m => map[m.userId] = m.displayName);
+        setMemberMap(map);
+      }
+    });
 
     return () => {
       unsubProjects();
@@ -116,8 +128,9 @@ export default function AnalyticsPage() {
   const isLoading = projectsLoading || (projects.length > 0 && tasksLoading);
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
+    <ErrorBoundary>
+      <div className="space-y-8">
+        {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Analytics Overview</h1>
         <p className="mt-1 text-sm text-white/40">Detailed metrics and productivity insights across your workspace.</p>
@@ -246,7 +259,9 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs text-white/60 leading-relaxed">
-                        <span className="font-medium text-white/80">A member</span>{' '}
+                        <span className="font-medium text-white/80">
+                          {activity.ownerUid === user?.uid ? 'You' : (memberMap[activity.ownerUid] || 'A member')}
+                        </span>{' '}
                         {activity.action}{' '}
                         <span className="font-medium text-white/80">{activity.target}</span>
                       </p>
@@ -258,7 +273,8 @@ export default function AnalyticsPage() {
             )}
           </GlassCard>
         </div>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase';
 import { cancelInvite } from '@/services/invites';
 import { type ProjectInvite } from '@/types';
 import { XIcon } from '@/components/icons';
+import Image from 'next/image';
 
 export default function ProjectMembersPage() {
   const { user } = useAuth();
@@ -149,11 +150,13 @@ export default function ProjectMembersPage() {
           members.map((member) => (
             <GlassCard key={member.id} padding="md" className="flex flex-col justify-between">
               <div className="flex items-start gap-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={member.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.displayName)}&background=3b82f6&color=fff`}
                   alt={member.displayName}
-                  className="h-12 w-12 rounded-full border border-white/10"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-full border border-white/10 object-cover"
+                  unoptimized
                 />
                 <div className="flex-1 overflow-hidden">
                   <h3 className="truncate font-medium text-white">{member.displayName}</h3>

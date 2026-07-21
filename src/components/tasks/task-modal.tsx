@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { XIcon, CalendarIcon, FolderIcon, UserIcon, TagIcon, PaperclipIcon } from '@/components/icons';
+import { XIcon, CalendarIcon, FolderIcon, UserIcon, TagIcon } from '@/components/icons';
 import type { Project, TaskPriority, TaskStatus, Task } from '@/types';
 
 interface TaskModalProps {
@@ -224,13 +224,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
 
           {/* Footer Actions */}
           <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-            <button
-              type="button"
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white/40 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              <PaperclipIcon size={16} />
-              Attach File (Coming soon)
-            </button>
+
 
             <div className="flex items-center gap-3">
               <button

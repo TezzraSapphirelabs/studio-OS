@@ -7,12 +7,14 @@ export const maxDuration = 60; // Allows up to 1 minute execution
 
 export async function POST(req: Request) {
   try {
-    const key = req.headers.get('x-file-key');
+    const rawKey = req.headers.get('x-file-key');
     const contentType = req.headers.get('content-type') || 'application/octet-stream';
 
-    if (!key) {
+    if (!rawKey) {
       return NextResponse.json({ error: 'Missing x-file-key header' }, { status: 400 });
     }
+    
+    const key = decodeURIComponent(rawKey);
 
     if (!req.body) {
       return NextResponse.json({ error: 'Missing request body' }, { status: 400 });

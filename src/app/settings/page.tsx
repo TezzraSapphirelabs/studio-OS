@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { GlassCard } from '@/components';
 import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/contexts/toast-context';
 import { getDisplayName } from '@/utils';
 import DeleteAccountModal from '@/components/modals/DeleteAccountModal';
 import { fetchUserProfile, updateUserProfile } from '@/services/profile';
@@ -10,10 +11,12 @@ import { fetchWorkspaceSettings, saveWorkspaceSettings, deleteWorkspace } from '
 import { subscribeToWorkspaceActivity } from '@/services/activity';
 import { type UserProfile, type WorkspaceSettings, type ProjectActivity } from '@/types';
 import { format } from 'date-fns';
+import Image from 'next/image';
 import { uploadFileToStorage, getFileUrl } from '@/lib/storage/client';
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, retryRoleSync } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'profile' | 'workspace' | 'activity'>('profile');
   
   // Profile State
@@ -24,6 +27,11 @@ export default function SettingsPage() {
   // Workspace State
   const [workspace, setWorkspace] = useState<WorkspaceSettings | null>(null);
   const [isWorkspaceSaving, setIsWorkspaceSaving] = useState(false);
+  
+  const [detectedTimezone] = useState(() => {
+    if (typeof window !== 'undefined') return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return '';
+  });
 
   // Activity State
   const [activities, setActivities] = useState<ProjectActivity[]>([]);
@@ -32,6 +40,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
+
+    const tz = detectedTimezone;
 
     // Load Profile
     fetchUserProfile(user.uid).then(({ profile }) => {
@@ -42,25 +52,32 @@ export default function SettingsPage() {
     if (workspaceId) {
       fetchWorkspaceSettings(workspaceId).then(({ settings }) => {
         if (settings) {
+          // If timezone differs, save the auto-detected one in the background
+          if (settings.timezone !== tz) {
+            settings.timezone = tz;
+            saveWorkspaceSettings(workspaceId, settings, user.uid);
+          }
           setWorkspace(settings);
         } else {
           // Initialize defaults
-          setWorkspace({
+          const defaults = {
             id: workspaceId,
             name: 'My Workspace',
             description: '',
             logoUrl: null,
-            timezone: 'UTC',
+            timezone: tz,
             defaultLanguage: 'en',
             dateFormat: 'MM/DD/YYYY',
             timeFormat: '12h',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
-          });
+          };
+          setWorkspace(defaults);
+          saveWorkspaceSettings(workspaceId, defaults, user.uid);
         }
       });
     }
-  }, [user, workspaceId]);
+  }, [user, workspaceId, detectedTimezone]);
 
   useEffect(() => {
     if (!workspaceId || activeTab !== 'activity') return;
@@ -81,7 +98,9 @@ export default function SettingsPage() {
       themePreference: profile.themePreference,
       notificationPreferences: profile.notificationPreferences
     });
+    await retryRoleSync();
     setIsProfileSaving(false);
+    toast('Profile updated successfully', 'success');
   };
 
   const handleWorkspaceSave = async (e: React.FormEvent) => {
@@ -98,6 +117,7 @@ export default function SettingsPage() {
       timeFormat: workspace.timeFormat
     }, user.uid);
     setIsWorkspaceSaving(false);
+    toast('Workspace settings saved', 'success');
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'workspace') => {
@@ -185,8 +205,7 @@ export default function SettingsPage() {
                   <label className="text-sm font-medium text-white/70">Profile Photo</label>
                   <div className="flex items-center gap-4 sm:w-64">
                     {profile.photoURL ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={profile.photoURL} alt="Profile" className="h-10 w-10 rounded-full object-cover border border-white/10" />
+                      <Image src={profile.photoURL} alt="Profile" width={40} height={40} className="h-10 w-10 rounded-full object-cover border border-white/10" unoptimized />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-500/20 text-violet-400 font-bold">
                         {profile.displayName.charAt(0).toUpperCase()}
@@ -249,9 +268,7 @@ export default function SettingsPage() {
                     }}
                     className="h-9 w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-sm text-white outline-none focus:border-violet-500/50 focus:bg-white/[0.05] sm:w-64"
                   >
-                    <option value="dark" className="bg-[#0f0f13]">Dark (Default)</option>
-                    <option value="light" className="bg-[#0f0f13]" disabled>Light (Coming Soon)</option>
-                    <option value="system" className="bg-[#0f0f13]" disabled>System (Coming Soon)</option>
+                    <option value="dark" className="bg-[#0f0f13]">Dark</option>
                   </select>
                 </div>
               </div>
@@ -347,8 +364,7 @@ export default function SettingsPage() {
                   <label className="text-sm font-medium text-white/70">Workspace Logo</label>
                   <div className="flex items-center gap-4 sm:w-64">
                     {workspace.logoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={workspace.logoUrl} alt="Workspace Logo" className="h-10 w-10 rounded-xl object-cover border border-white/10" />
+                      <Image src={workspace.logoUrl} alt="Workspace Logo" width={40} height={40} className="h-10 w-10 rounded-xl object-cover border border-white/10" unoptimized />
                     ) : (
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/40 border border-white/10">
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -393,28 +409,15 @@ export default function SettingsPage() {
               <div className="space-y-5">
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                   <label className="text-sm font-medium text-white/70">Timezone</label>
-                  <select
-                    value={workspace.timezone}
-                    onChange={(e) => setWorkspace({ ...workspace, timezone: e.target.value })}
-                    disabled={!isOwner}
-                    className="h-9 w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-sm text-white outline-none focus:border-violet-500/50 focus:bg-white/[0.05] sm:w-64 disabled:opacity-50"
-                  >
-                    <option value="UTC" className="bg-[#0f0f13]">UTC</option>
-                    <option value="America/New_York" className="bg-[#0f0f13]">Eastern Time</option>
-                    <option value="America/Los_Angeles" className="bg-[#0f0f13]">Pacific Time</option>
-                  </select>
+                  <div className="flex h-9 w-full sm:w-64 items-center rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-sm text-white/60">
+                    {detectedTimezone || workspace.timezone} (Auto-detected)
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
                   <label className="text-sm font-medium text-white/70">Language</label>
-                  <select
-                    value={workspace.defaultLanguage}
-                    onChange={(e) => setWorkspace({ ...workspace, defaultLanguage: e.target.value })}
-                    disabled={!isOwner}
-                    className="h-9 w-full rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-sm text-white outline-none focus:border-violet-500/50 focus:bg-white/[0.05] sm:w-64 disabled:opacity-50"
-                  >
-                    <option value="en" className="bg-[#0f0f13]">English</option>
-                    <option value="es" className="bg-[#0f0f13]">Spanish</option>
-                  </select>
+                  <div className="flex h-9 w-full sm:w-64 items-center rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 text-sm text-white/60">
+                    English (Default)
+                  </div>
                 </div>
               </div>
             </GlassCard>

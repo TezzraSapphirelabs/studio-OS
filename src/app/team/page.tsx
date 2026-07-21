@@ -2,14 +2,16 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { GlassCard } from '@/components';
-import { SearchIcon, MoreVerticalIcon } from '@/components/icons';
+import { SearchIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
 import { fetchWorkspaceMembers, updateWorkspaceMemberRole, removeWorkspaceMember, fetchWorkspaceInvites, cancelWorkspaceInvite } from '@/services/workspace';
 import type { WorkspaceMember, WorkspaceRole, WorkspaceInvite } from '@/types';
 import WorkspaceInviteModal from '@/components/modals/WorkspaceInviteModal';
 import { getInitials, formatRelativeDate } from '@/utils';
+import Image from 'next/image';
 import { isUserOnline } from '@/services/presence';
-import { ClockIcon, XIcon } from '@/components/icons';
+import { ClockIcon } from '@/components/icons';
+import MemberDrawer from './member-drawer';
 
 export default function TeamPage() {
   const { user } = useAuth();
@@ -21,9 +23,11 @@ export default function TeamPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
 
-  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [selectedMember, setSelectedMember] = useState<WorkspaceMember | null>(null);
+  const [selectedInvite, setSelectedInvite] = useState<WorkspaceInvite | null>(null);
 
   const workspaceId = user?.uid; // User is the workspace owner by default
+  const currentUserRole = members.find(m => m.userId === user?.uid)?.role || 'member';
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -63,7 +67,9 @@ export default function TeamPage() {
     if (!workspaceId || !user) return;
     // Optimistic update
     setMembers(prev => prev.map(m => m.id === memberId ? { ...m, role: newRole } : m));
-    setActiveMenuId(null);
+    if (selectedMember && selectedMember.id === memberId) {
+      setSelectedMember(prev => prev ? { ...prev, role: newRole } : prev);
+    }
     const { error: updateErr } = await updateWorkspaceMemberRole(workspaceId, userId, newRole, user.uid);
     if (updateErr) {
       alert(updateErr);
@@ -77,7 +83,6 @@ export default function TeamPage() {
     
     // Optimistic update
     setMembers(prev => prev.filter(m => m.id !== memberId));
-    setActiveMenuId(null);
     const { error: removeErr } = await removeWorkspaceMember(workspaceId, userId, user.uid);
     if (removeErr) {
       alert(removeErr);
@@ -167,12 +172,15 @@ export default function TeamPage() {
               const isOnline = isUserOnline(member.joinedAt); // Mock for now, requires fetching profiles
 
               return (
-                <div key={member.id} className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.02]">
+                <div 
+                  key={member.id} 
+                  className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.04] cursor-pointer"
+                  onClick={() => setSelectedMember(member)}
+                >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="relative shrink-0">
                       {member.photoURL ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={member.photoURL} alt={member.displayName} className="h-10 w-10 rounded-full object-cover border border-white/[0.08]" />
+                        <Image src={member.photoURL} alt={member.displayName} width={40} height={40} className="h-10 w-10 rounded-full object-cover border border-white/[0.08]" unoptimized />
                       ) : (
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-sm font-bold text-white shadow-inner">
                           {getInitials(member.displayName, member.email)}
@@ -199,43 +207,6 @@ export default function TeamPage() {
                     <span className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getRoleBadgeColor(member.role)}`}>
                       {member.role}
                     </span>
-
-                    {/* Actions */}
-                    {member.role !== 'owner' && (
-                      <div className="relative">
-                        <button
-                          onClick={() => setActiveMenuId(activeMenuId === member.id ? null : member.id)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:bg-white/[0.06] hover:text-white transition-colors"
-                        >
-                          <MoreVerticalIcon size={16} />
-                        </button>
-
-                        {activeMenuId === member.id && (
-                          <>
-                            <div className="fixed inset-0 z-10" onClick={() => setActiveMenuId(null)} />
-                            <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-white/[0.08] bg-[#0f0f13] p-1 shadow-xl animate-in fade-in zoom-in-95">
-                              <div className="px-2 py-1.5 text-xs font-medium text-white/40">Change Role</div>
-                              {['admin', 'member', 'viewer'].map((role) => (
-                                <button
-                                  key={role}
-                                  onClick={() => handleRoleChange(member.id, member.userId, role as WorkspaceRole)}
-                                  className={`flex w-full items-center px-3 py-2 text-sm capitalize transition-colors hover:bg-white/[0.06] rounded-lg ${member.role === role ? 'text-violet-400 font-medium' : 'text-white/70'}`}
-                                >
-                                  {role}
-                                </button>
-                              ))}
-                              <div className="my-1 h-px bg-white/[0.06]" />
-                              <button
-                                onClick={() => handleRemove(member.id, member.userId)}
-                                className="flex w-full items-center px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                              >
-                                Remove Member
-                              </button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -251,7 +222,11 @@ export default function TeamPage() {
           <GlassCard padding="none" className="overflow-hidden">
             <div className="divide-y divide-white/[0.04]">
               {invites.map(invite => (
-                <div key={invite.id} className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.02]">
+                <div 
+                  key={invite.id} 
+                  className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.04] cursor-pointer"
+                  onClick={() => setSelectedInvite(invite)}
+                >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="relative shrink-0">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] text-sm font-bold text-white shadow-inner">
@@ -275,13 +250,6 @@ export default function TeamPage() {
                     <span className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getRoleBadgeColor(invite.role)}`}>
                       {invite.role}
                     </span>
-                    <button
-                      onClick={() => handleCancelInvite(invite.id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400/50 hover:bg-red-500/10 hover:text-red-400 transition-colors"
-                      title="Cancel Invite"
-                    >
-                      <XIcon size={16} />
-                    </button>
                   </div>
                 </div>
               ))}
@@ -301,6 +269,35 @@ export default function TeamPage() {
           }}
         />
       )}
+
+      <MemberDrawer
+        isOpen={!!selectedMember || !!selectedInvite}
+        onClose={() => {
+          setSelectedMember(null);
+          setSelectedInvite(null);
+        }}
+        member={selectedMember}
+        invite={selectedInvite}
+        currentUserRole={currentUserRole}
+        onRoleChange={(newRole) => {
+          if (selectedMember) handleRoleChange(selectedMember.id, selectedMember.userId, newRole);
+        }}
+        onRemove={() => {
+          if (selectedMember) {
+            handleRemove(selectedMember.id, selectedMember.userId);
+            setSelectedMember(null);
+          }
+        }}
+        onCancelInvite={() => {
+          if (selectedInvite) {
+            handleCancelInvite(selectedInvite.id);
+            setSelectedInvite(null);
+          }
+        }}
+        onResendInvite={() => {
+          alert('Invitation link copied to clipboard!');
+        }}
+      />
     </div>
   );
 }
