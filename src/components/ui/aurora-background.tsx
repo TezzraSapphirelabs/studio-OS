@@ -228,7 +228,7 @@ export const AuroraBackground = ({ children, className }: { children?: React.Rea
     <div className={cn("relative min-h-screen w-full bg-[#000] overflow-hidden", className)}>
       
       {/* WebGL Canvas Layer */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <Canvas 
           orthographic 
           camera={{ position: [0, 0, 1], left: -1, right: 1, top: 1, bottom: -1, near: 0.1, far: 10 }}

@@ -119,3 +119,13 @@ body {
 .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
 .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
 .stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+@keyframes shiny-text {
+  0%, 10% { background-position: -200% 0; }
+  15%, 100% { background-position: 200% 0; }
+}
+
+.animate-shiny-text {
+  animation: shiny-text 8s infinite;
+}
+
