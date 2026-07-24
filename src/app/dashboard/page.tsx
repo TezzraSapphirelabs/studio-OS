@@ -1,402 +1,196 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { GlassCard, StatCard, ProgressBar } from '@/components';
-import { FolderIcon, CheckSquareIcon, UsersIcon, TrendingUpIcon, ChevronRightIcon, ClockIcon } from '@/components/icons';
-import { getCompletionPercent, getDisplayName } from '@/utils';
-import { useAuth } from '@/contexts/auth-context';
-import Link from 'next/link';
-import { subscribeToProjects } from '@/services/projects';
-import { subscribeToWorkspaceActivity } from '@/services/activity';
-import { fetchWorkspaceMembers } from '@/services/workspace';
-import { type Project, type ProjectActivity } from '@/types';
-import { useAllProjectsTasks } from '@/hooks/use-tasks';
+import React from "react";
+import { motion } from "motion/react";
+import { BlurText } from "@/components/ui/blur-text";
+import { 
+  FolderKanban, 
+  CheckSquare, 
+  Clock, 
+  Sparkles, 
+  ArrowUpRight,
+  MoreHorizontal
+} from "lucide-react";
+import Link from "next/link";
+import { GlassCard } from "@/components/glass-card";
+import { StatCard } from "@/components/stat-card";
+
+const FADE_UP = {
+  hidden: { opacity: 0, y: 20, filter: 'blur(5px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: "easeOut" as const } }
+};
+
+const STAGGER = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+  }
+};
+
+const STATS = [
+  { label: "Active Projects", value: "12", icon: FolderKanban, trend: "+2 this week" },
+  { label: "Tasks Due", value: "24", icon: CheckSquare, trend: "4 high priority" },
+  { label: "Hours Tracked", value: "38.5", icon: Clock, trend: "This week" },
+];
+
+const RECENT_PROJECTS = [
+  { name: "Nebula Redesign", status: "In Progress", progress: 75, date: "Updated 2h ago" },
+  { name: "Q3 Marketing Site", status: "Review", progress: 90, date: "Updated 5h ago" },
+  { name: "iOS App v2.0", status: "Planning", progress: 15, date: "Updated 1d ago" },
+];
+
+const TASKS = [
+  { title: "Review final mockups for Nebula", project: "Nebula Redesign", time: "10:00 AM", done: false },
+  { title: "Client sync on Q3 deliverables", project: "Q3 Marketing Site", time: "1:30 PM", done: false },
+  { title: "Update component library", project: "Internal", time: "4:00 PM", done: true },
+];
 
 export default function DashboardPage() {
-  const { user, userProfile } = useAuth();
-  
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(true);
-  
-  const [recentActivity, setRecentActivity] = useState<ProjectActivity[]>([]);
-  const [activityLoading, setActivityLoading] = useState(true);
-  const [memberMap, setMemberMap] = useState<Record<string, string>>({});
-
-  const { tasks, loading: tasksLoading } = useAllProjectsTasks(user?.uid, projects);
-
-  useEffect(() => {
-    if (!user) return;
-    
-    // Subscribe to projects
-    const unsubProjects = subscribeToProjects(
-      user.uid,
-      (data) => {
-        setProjects(data);
-        setProjectsLoading(false);
-      },
-      (err) => {
-        console.error('Error fetching projects:', err);
-        setProjectsLoading(false);
-      }
-    );
-
-    // Subscribe to activity (using user.uid as workspaceId for now, matching app architecture)
-    const unsubActivity = subscribeToWorkspaceActivity(
-      user.uid,
-      (data) => {
-        setRecentActivity(data.slice(0, 10)); // keep only top 10 recent activities
-        setActivityLoading(false);
-      }
-    );
-
-    // Fetch workspace members to resolve real names for activity feed
-    fetchWorkspaceMembers(user.uid).then(({ members }) => {
-      if (members) {
-        const map: Record<string, string> = {};
-        members.forEach(m => map[m.userId] = m.displayName);
-        setMemberMap(map);
-      }
-    });
-
-    return () => {
-      unsubProjects();
-      unsubActivity();
-    };
-  }, [user]);
-
-  const activeProjects = useMemo(() => projects.filter((p) => p.status === 'active'), [projects]);
-  const inProgressTasks = useMemo(() => tasks.filter((t) => t.status === 'in-progress'), [tasks]);
-  
-  // Calculate overdue tasks and upcoming deadlines
-  const { overdueTasks, upcomingDeadlines } = useMemo(() => {
-    const todayLocal = new Date();
-    const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth() + 1).padStart(2, '0')}-${String(todayLocal.getDate()).padStart(2, '0')}`;
-
-    const withDeadlines = tasks.filter(t => t.dueDate && t.status !== 'done');
-    
-    const overdue = withDeadlines.filter(t => {
-      // dueDate is stored as UTC midnight of the selected date. Extract the YYYY-MM-DD.
-      const dueStr = t.dueDate!.split('T')[0];
-      return dueStr < todayStr;
-    });
-
-    const upcoming = withDeadlines
-      .filter(t => {
-        const dueStr = t.dueDate!.split('T')[0];
-        return dueStr >= todayStr;
-      })
-      .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-      .slice(0, 5); // top 5 upcoming
-
-    return { overdueTasks: overdue, upcomingDeadlines: upcoming };
-  }, [tasks]);
-
-  const stats = useMemo(() => {
-    let completed = 0;
-    let active = 0;
-    const uniqueMembers = new Set<string>();
-
-    projects.forEach(p => {
-      // In a real app we might rely on the tasks array, but relying on project counters is also ok.
-      // Let's use the actual tasks array for precision since we have it!
-      if (p.memberUids) {
-        p.memberUids.forEach(uid => uniqueMembers.add(uid));
-      }
-    });
-
-    completed = tasks.filter(t => t.status === 'done').length;
-    active = tasks.filter(t => t.status !== 'done').length;
-
-    return {
-      totalProjects: projects.length,
-      activeTasks: active,
-      completedTasks: completed,
-      teamMembers: uniqueMembers.size,
-      overdueCount: overdueTasks.length,
-    };
-  }, [projects, tasks, overdueTasks.length]);
-
-  const getProjectName = (projectId: string) => projects.find((p) => p.id === projectId)?.name || 'Unknown';
-  const getProjectColor = (projectId: string) => projects.find((p) => p.id === projectId)?.color || '#8b5cf6';
-
-  const formatActivityTime = (isoString: string) => {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHrs = Math.floor(diffMins / 60);
-    if (diffHrs < 24) return `${diffHrs}h ago`;
-    const diffDays = Math.floor(diffHrs / 24);
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
-
-  const isInitialLoading = projectsLoading || (projects.length > 0 && tasksLoading);
-
   return (
-    <div className="space-y-8">
-      {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          Good afternoon, {userProfile?.displayName || getDisplayName(user)}
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={STAGGER}
+      className="p-6 lg:p-10 space-y-10 pb-24"
+    >
+      {/* Welcome Header */}
+      <motion.section variants={FADE_UP} className="flex flex-col gap-2">
+        <h1 className="text-3xl md:text-4xl font-light tracking-tight text-white">
+          <BlurText text="Good morning, User." delay={0} animateBy="words" />
         </h1>
-        <p className="mt-1 text-sm text-white/40">
-          Here&apos;s what&apos;s happening across your workspace today.
+        <p className="text-white/50 text-lg">
+          You have 4 high priority tasks due today.
         </p>
+      </motion.section>
+
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {STATS.map((stat, i) => (
+          <StatCard
+            key={i}
+            variants={FADE_UP}
+            label={stat.label}
+            value={stat.value}
+            icon={<stat.icon className="w-5 h-5 text-white" />}
+            trend={stat.trend}
+            trendUp={true}
+            accentColor="rgba(255,255,255,0.1)"
+          />
+        ))}
       </div>
 
-      {/* Stats grid */}
-      <div className="stagger-children grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {isInitialLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/5" />
-          ))
-        ) : (
-          <>
-            <StatCard
-              href="/projects"
-              label="Total Projects"
-              value={stats.totalProjects}
-              icon={<FolderIcon size={22} />}
-              trend="Active & Drafts"
-              trendUp={true}
-              accentColor="#8b5cf6"
-            />
-            <StatCard
-              href="/tasks?status=in-progress"
-              label="Active Tasks"
-              value={stats.activeTasks}
-              icon={<CheckSquareIcon size={22} />}
-              trend={stats.overdueCount > 0 ? `${stats.overdueCount} overdue` : 'All on track'}
-              trendUp={stats.overdueCount === 0}
-              accentColor={stats.overdueCount > 0 ? "#ef4444" : "#06b6d4"}
-            />
-            <StatCard
-              href="/tasks?status=done"
-              label="Completed Tasks"
-              value={stats.completedTasks}
-              icon={<TrendingUpIcon size={22} />}
-              trend="Across all projects"
-              trendUp={true}
-              accentColor="#22c55e"
-            />
-            <StatCard
-              href="/team"
-              label="Team Members"
-              value={stats.teamMembers}
-              icon={<UsersIcon size={22} />}
-              trend="View members"
-              trendUp={true}
-              accentColor="#ec4899"
-            />
-          </>
-        )}
-      </div>
-
-      {/* Two-column layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Column: Active Projects & Upcoming Deadlines */}
-        <div className="space-y-6 lg:col-span-2">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        {/* Left Column (Projects & Activity) */}
+        <div className="xl:col-span-2 space-y-8">
           
-          {/* Active Projects */}
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Active Projects</h2>
-              <Link
-                href="/projects"
-                className="flex items-center gap-1 text-xs font-medium text-white/40 transition-colors hover:text-violet-400"
-              >
-                View all <ChevronRightIcon size={14} />
+          {/* Recent Projects */}
+          <div className="space-y-4">
+            <motion.div variants={FADE_UP} className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-white">Recent Projects</h2>
+              <Link href="/projects" className="text-sm text-white/50 hover:text-white flex items-center gap-1 transition-colors">
+                View all <ArrowUpRight className="w-4 h-4" />
               </Link>
+            </motion.div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {RECENT_PROJECTS.map((project, i) => (
+                <GlassCard key={i} variants={FADE_UP} hover padding="none" className="p-5 flex flex-col gap-4">
+                  <div className="flex justify-between items-start">
+                    <div className="w-10 h-10 rounded-full bg-white/[0.05] flex items-center justify-center">
+                      <FolderKanban className="w-5 h-5 text-white/70" />
+                    </div>
+                    <button className="text-white/30 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-medium mb-1">{project.name}</h3>
+                    <p className="text-white/40 text-xs">{project.date}</p>
+                  </div>
+                  <div className="space-y-2 mt-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-white/50">{project.status}</span>
+                      <span className="text-white/70">{project.progress}%</span>
+                    </div>
+                    <div className="h-1 w-full bg-white/[0.05] rounded-full overflow-hidden">
+                      <div className="h-full bg-white/40 rounded-full" style={{ width: `${project.progress}%` }} />
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
             </div>
-            
-            {projectsLoading ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-32 animate-pulse rounded-2xl bg-white/5" />
-                ))}
-              </div>
-            ) : activeProjects.length === 0 ? (
-              <div className="flex h-32 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-sm text-white/40">
-                No active projects found.
-              </div>
-            ) : (
-              <div className="stagger-children grid gap-4 sm:grid-cols-2">
-                {activeProjects.map((project) => {
-                  const pTasks = tasks.filter(t => t.projectId === project.id);
-                  const pCompleted = pTasks.filter(t => t.status === 'done').length;
-                  const pTotal = pTasks.length;
-                  
-                  return (
-                    <GlassCard key={project.id} href={`/projects/${project.id}`} hover padding="md">
-                      <div className="mb-4 flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                            style={{ backgroundColor: `${project.color}20` }}
-                          >
-                            <FolderIcon size={18} className="" style={{ color: project.color }} />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold text-white">{project.name}</h3>
-                            <p className="text-xs text-white/40">{project.memberUids?.length || 1} members</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="mb-4 text-xs leading-relaxed text-white/40 line-clamp-2">
-                        {project.description || 'No description provided.'}
-                      </p>
-
-                      <div>
-                        <div className="mb-2 flex items-center justify-between text-xs">
-                          <span className="text-white/40">Progress</span>
-                          <span className="font-medium text-white/60">
-                            {pCompleted}/{pTotal} tasks
-                          </span>
-                        </div>
-                        <ProgressBar
-                          value={getCompletionPercent(pCompleted, pTotal)}
-                          color={project.color}
-                        />
-                      </div>
-                    </GlassCard>
-                  )
-                })}
-              </div>
-            )}
           </div>
 
-          {/* Upcoming Deadlines */}
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Upcoming Deadlines</h2>
-              <Link
-                href="/tasks"
-                className="flex items-center gap-1 text-xs font-medium text-white/40 transition-colors hover:text-violet-400"
-              >
-                View all tasks <ChevronRightIcon size={14} />
-              </Link>
+          {/* AI Workspace Preview */}
+          <motion.section variants={FADE_UP} className="glass-panel p-8 rounded-[24px] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Sparkles className="w-32 h-32 text-white" />
             </div>
-            
-            {tasksLoading && projects.length > 0 ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-2xl bg-white/5" />
-                ))}
+            <div className="relative z-10 max-w-lg space-y-4">
+              <div className="flex items-center gap-2 text-white/70 mb-2">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-xs uppercase tracking-widest font-mono">Intelligence</span>
               </div>
-            ) : upcomingDeadlines.length === 0 ? (
-              <div className="flex h-24 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-sm text-white/40">
-                No upcoming task deadlines.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {upcomingDeadlines.map((task) => (
-                  <GlassCard key={task.id} hover padding="sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="h-2 w-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: getProjectColor(task.projectId) }}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-white">{task.title}</p>
-                          <p className="text-xs text-white/40">{getProjectName(task.projectId)}</p>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-xs font-medium text-white/80">
-                          {new Date(task.dueDate!).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        </p>
-                        <p className="text-[10px] text-white/40 capitalize">{task.priority} Priority</p>
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
-            )}
-          </div>
-
-        </div>
-
-        {/* Sidebar: Activity + In-Progress */}
-        <div className="space-y-6">
-          {/* In-Progress Tasks */}
-          <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">In Progress</h2>
-              <span className="text-xs text-white/40">{inProgressTasks.length} tasks</span>
-            </div>
-            
-            {tasksLoading && projects.length > 0 ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-14 animate-pulse rounded-2xl bg-white/5" />
-                ))}
-              </div>
-            ) : inProgressTasks.length === 0 ? (
-              <div className="flex h-24 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-center text-sm text-white/40 px-4">
-                No tasks currently in progress.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {inProgressTasks.slice(0, 6).map((task) => (
-                  <GlassCard key={task.id} href="/tasks" hover padding="sm">
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: getProjectColor(task.projectId) }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-white">{task.title}</p>
-                        <p className="text-xs text-white/40">{getProjectName(task.projectId)}</p>
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Recent Activity */}
-          <div>
-            <h2 className="mb-4 text-lg font-semibold text-white">Recent Activity</h2>
-            {activityLoading ? (
-              <div className="h-64 animate-pulse rounded-2xl bg-white/5" />
-            ) : recentActivity.length === 0 ? (
-              <div className="flex h-32 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] text-sm text-white/40">
-                No recent activity.
-              </div>
-            ) : (
-              <GlassCard padding="none">
-                <div className="divide-y divide-white/[0.04]">
-                  {recentActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 px-4 py-3">
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.06]">
-                        <ClockIcon size={14} className="text-white/40" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-white/60">
-                          {/* If the activity user is known or just a name */}
-                          <span className="font-medium text-white/80">
-                            {activity.ownerUid === user?.uid ? getDisplayName(user) : (memberMap[activity.ownerUid] || 'A member')}
-                          </span>{' '}
-                          {activity.action}{' '}
-                          <span className="font-medium text-white/80">{activity.target}</span>
-                        </p>
-                        <p className="mt-0.5 text-[10px] text-white/25">{formatActivityTime(activity.createdAt)}</p>
-                      </div>
-                    </div>
-                  ))}
+              <h2 className="text-2xl font-light text-white">Ask Studio AI</h2>
+              <p className="text-white/50 text-sm leading-relaxed">
+                Analyze project progress, generate reports, or ask for insights across your workspace.
+              </p>
+              <div className="mt-6 flex">
+                <div className="relative w-full max-w-md group-focus-within:ring-1 ring-white/20 rounded-xl transition-all">
+                  <input 
+                    type="text" 
+                    placeholder="E.g. Summarize the latest updates on Nebula..."
+                    className="w-full h-12 bg-white/[0.03] border border-white/[0.06] rounded-xl pl-4 pr-12 text-white text-[14px] placeholder:text-white/20 transition-all duration-300 outline-none focus:border-white/20 focus:bg-white/[0.05] hover:bg-white/[0.04]"
+                  />
+                  <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors">
+                    <ArrowUpRight className="w-4 h-4" />
+                  </button>
                 </div>
-              </GlassCard>
-            )}
+              </div>
+            </div>
+          </motion.section>
+        </div>
+
+        {/* Right Column (Tasks & Calendar) */}
+        <div className="space-y-8">
+          
+          {/* Today's Tasks */}
+          <div className="space-y-4">
+            <motion.div variants={FADE_UP} className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-white">Today&apos;s Tasks</h2>
+              <Link href="/tasks" className="text-sm text-white/50 hover:text-white flex items-center gap-1 transition-colors">
+                View all <ArrowUpRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+            <GlassCard variants={FADE_UP} padding="none" className="p-1">
+              <div className="space-y-1">
+                {TASKS.map((task, i) => (
+                  <div key={i} className="p-4 rounded-xl hover:bg-white/[0.04] transition-colors flex gap-4 group cursor-pointer">
+                    <div className="pt-0.5">
+                      <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${task.done ? 'bg-white text-black border-white' : 'border-white/20 group-hover:border-white/40'}`}>
+                        {task.done && <CheckSquare className="w-3.5 h-3.5" />}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium truncate ${task.done ? 'text-white/30 line-through' : 'text-white/90'}`}>
+                        {task.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-white/40">
+                        <span>{task.project}</span>
+                        <span>•</span>
+                        <span>{task.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
           </div>
         </div>
+
       </div>
-    </div>
+    </motion.div>
   );
 }

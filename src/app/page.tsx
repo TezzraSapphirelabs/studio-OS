@@ -162,7 +162,7 @@ export default function WelcomePage() {
                 <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white leading-tight">
                   <BlurText text="Everything you need." delay={0.1} />
                   <br />
-                  <span className="text-white/30">Nothing you don't.</span>
+                  <span className="text-white/30">Nothing you don&apos;t.</span>
                 </h2>
                 <div className="space-y-6">
                   {[

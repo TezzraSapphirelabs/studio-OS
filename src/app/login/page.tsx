@@ -57,8 +57,8 @@ function LoginContent() {
         await login(email, password);
         router.push('/dashboard');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to authenticate. Please check your credentials.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Failed to authenticate. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -70,8 +70,8 @@ function LoginContent() {
     try {
       await googleLogin();
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Google sign-in failed.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'Google sign-in failed.');
     } finally {
       setLoading(false);
     }
@@ -83,8 +83,8 @@ function LoginContent() {
     try {
       await githubLogin();
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'GitHub sign-in failed.');
+    } catch (err: unknown) {
+      setError((err as Error).message || 'GitHub sign-in failed.');
     } finally {
       setLoading(false);
     }
@@ -236,7 +236,7 @@ function LoginContent() {
             className="mt-8 text-center"
           >
             <p className="text-[12px] text-white/50">
-              Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
               <Link href="/register" className="text-white hover:text-white/80 font-medium transition-colors">
                 Sign up
               </Link>
