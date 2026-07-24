@@ -17,8 +17,8 @@ export default function Error({
 
   return (
     <div className="flex min-h-[400px] flex-col items-center justify-center p-6 text-center">
-      <div className="mb-6 rounded-full bg-red-500/10 p-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+      <div className="mb-6 rounded-full bg-white/[0.04] p-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -37,7 +37,7 @@ export default function Error({
         </button>
         <Link
           href="/dashboard"
-          className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-500"
+          className="rounded-xl bg-white text-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white text-black"
         >
           Go to Dashboard
         </Link>

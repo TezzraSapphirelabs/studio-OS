@@ -95,9 +95,9 @@ function RegisterContent() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#07070a] py-12">
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-violet-600/[0.12] blur-[100px]" />
-        <div className="absolute -bottom-32 right-1/4 h-[400px] w-[400px] rounded-full bg-fuchsia-600/[0.08] blur-[100px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-cyan-500/[0.05] blur-[80px]" />
+        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-white text-black/[0.12] blur-[100px]" />
+        <div className="absolute -bottom-32 right-1/4 h-[400px] w-[400px] rounded-full bg-white text-black/[0.08] blur-[100px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-white/[0.04] blur-[80px]" />
       </div>
 
       {/* Subtle grid pattern */}
@@ -121,7 +121,7 @@ function RegisterContent() {
             </p>
             
             {error && (
-              <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-300">
+              <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/50">
                 {error}
               </div>
             )}
@@ -214,7 +214,7 @@ function RegisterContent() {
                         setLoading(false);
                       }}
                       disabled={loading}
-                      className="text-xs font-medium text-violet-400 transition-colors hover:text-violet-300 disabled:opacity-50"
+                      className="text-xs font-medium text-white/70 transition-colors hover:text-white/50 disabled:opacity-50"
                     >
                       Forgot your password?
                     </button>
@@ -226,13 +226,13 @@ function RegisterContent() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     disabled={loading}
-                    className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition-all hover:shadow-violet-600/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
+                  className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-white  text-sm font-semibold  text-black shadow-lg shadow-white/10 transition-all hover:shadow-white/20 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
                 >
                   {loading ? (
                     <svg className="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -297,13 +297,13 @@ function RegisterContent() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
                       disabled={loading}
-                      className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition-all hover:shadow-violet-600/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
+                    className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-white  text-sm font-semibold  text-black shadow-lg shadow-white/10 transition-all hover:shadow-white/20 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
                   >
                     {loading ? (
                       <svg className="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -329,7 +329,7 @@ function RegisterContent() {
           <div className="animate-fade-in-up rounded-3xl border border-white/[0.08] bg-white/[0.03] p-8 shadow-2xl backdrop-blur-2xl sm:p-10">
           {/* Logo */}
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/25">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-lg shadow-white/10">
               <span className="text-xl font-bold text-white">S</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white">
@@ -342,14 +342,14 @@ function RegisterContent() {
 
           {/* Error message */}
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-4 py-3 text-sm text-red-300">
+            <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/50">
               {error}
             </div>
           )}
 
           {/* Success message */}
           {success && (
-            <div className="mb-4 rounded-xl border border-green-500/20 bg-green-500/[0.08] px-4 py-3 text-sm text-green-300">
+            <div className="mb-4 rounded-xl border border-white/10 bg-white text-black/[0.08] px-4 py-3 text-sm text-white/50">
               {success}
             </div>
           )}
@@ -367,7 +367,7 @@ function RegisterContent() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Jane Doe"
                 disabled={loading}
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div>
@@ -381,7 +381,7 @@ function RegisterContent() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@studio.os"
                 disabled={loading}
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div>
@@ -395,7 +395,7 @@ function RegisterContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={loading}
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
             <div>
@@ -409,14 +409,14 @@ function RegisterContent() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 disabled={loading}
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.06] focus:ring-1 focus:ring-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.06] focus:ring-1 focus:ring-white/20/25 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition-all hover:shadow-violet-600/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
+              className="mt-2 flex h-11 w-full items-center justify-center rounded-xl bg-white  text-sm font-semibold  text-black shadow-lg shadow-white/10 transition-all hover:shadow-white/20 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100"
             >
               {loading ? (
                 <svg className="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -460,7 +460,7 @@ function RegisterContent() {
 
           <p className="mt-6 text-center text-xs text-white/25">
             Already have an account?{' '}
-            <Link href="/login" className="font-medium text-violet-400 cursor-pointer hover:text-violet-300 transition-colors">
+            <Link href="/login" className="font-medium text-white/70 cursor-pointer hover:text-white/50 transition-colors">
               Sign In
             </Link>
           </p>
@@ -475,7 +475,7 @@ export default function RegisterPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-[#07070a]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/20 border-t-transparent" />
       </div>
     }>
       <RegisterContent />

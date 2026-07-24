@@ -109,7 +109,7 @@ export default function EventModal({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Event title"
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
               />
             </div>
             
@@ -121,7 +121,7 @@ export default function EventModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add details..."
                 rows={3}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all resize-none"
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all resize-none"
               />
             </div>
             
@@ -138,7 +138,7 @@ export default function EventModal({
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     required
-                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
                     style={{ colorScheme: 'dark' }}
                   />
                 </div>
@@ -150,7 +150,7 @@ export default function EventModal({
                     type="checkbox"
                     checked={isAllDay}
                     onChange={(e) => setIsAllDay(e.target.checked)}
-                    className="rounded border-white/20 bg-black/40 text-violet-500 focus:ring-violet-500/50 focus:ring-offset-0"
+                    className="rounded border-white/20 bg-black/40 text-white/70 focus:ring-white/20/50 focus:ring-offset-0"
                   />
                   <span className="text-sm font-medium text-white/80">All day event</span>
                 </label>
@@ -171,7 +171,7 @@ export default function EventModal({
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
                       style={{ colorScheme: 'dark' }}
                     />
                   </div>
@@ -188,7 +188,7 @@ export default function EventModal({
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
                       required
-                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
                       style={{ colorScheme: 'dark' }}
                     />
                   </div>
@@ -203,7 +203,7 @@ export default function EventModal({
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as EventPriority)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -217,7 +217,7 @@ export default function EventModal({
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as EventStatus)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
                 >
                   <option value="upcoming">Upcoming</option>
                   <option value="in-progress">In Progress</option>
@@ -241,7 +241,7 @@ export default function EventModal({
             type="submit"
             form="event-form"
             disabled={isSubmitting || !title.trim()}
-            className="px-6 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:hover:bg-violet-600 rounded-lg shadow-lg shadow-violet-500/25 transition-all"
+            className="px-6 py-2 text-sm font-medium text-white bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:hover:bg-white text-black rounded-lg shadow-lg shadow-white/10 transition-all"
           >
             {isSubmitting ? 'Saving...' : existingEvent ? 'Save Changes' : 'Create Event'}
           </button>

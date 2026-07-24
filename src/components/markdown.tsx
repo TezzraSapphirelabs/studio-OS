@@ -38,7 +38,7 @@ export function Markdown({ content }: MarkdownProps) {
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           a(props: any) {
-            return <a target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:underline" {...props} />;
+            return <a target="_blank" rel="noopener noreferrer" className="text-white/70 hover:underline" {...props} />;
           }
         }}
       >
@@ -67,8 +67,8 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
         >
           {copied ? (
             <>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              <span className="text-green-400">Copied</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span className="text-white/70">Copied</span>
             </>
           ) : (
             <>

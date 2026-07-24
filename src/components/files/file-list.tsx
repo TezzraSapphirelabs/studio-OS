@@ -28,14 +28,14 @@ export function FileList({
   onContextMenu,
 }: FileListProps) {
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon size={20} className="text-violet-400" />;
-    if (type === 'application/pdf') return <PdfIcon size={20} className="text-rose-400" />;
-    if (type.startsWith('text/') || type.includes('markdown')) return <FileTextIcon size={20} className="text-blue-400" />;
+    if (type.startsWith('image/')) return <ImageIcon size={20} className="text-white/70" />;
+    if (type === 'application/pdf') return <PdfIcon size={20} className="text-white/70" />;
+    if (type.startsWith('text/') || type.includes('markdown')) return <FileTextIcon size={20} className="text-white/70" />;
     return <FilesIcon size={20} className="text-white/40" />;
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-white/[0.04] bg-white/[0.02]">
+    <div className="glass-panel w-full overflow-hidden">
       <table className="w-full text-left text-sm text-white/70">
         <thead className="border-b border-white/[0.04] bg-white/[0.02] text-xs uppercase text-white/50">
           <tr>
@@ -55,7 +55,7 @@ export function FileList({
             >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <FolderIcon size={20} className="text-violet-500" />
+                  <FolderIcon size={20} className="text-white/70" />
                   <span className="font-medium text-white/90">{folder.name}</span>
                 </div>
               </td>

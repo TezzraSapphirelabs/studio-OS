@@ -13,7 +13,7 @@ interface ProgressBarProps {
   showLabel?: boolean;
 }
 
-export function ProgressBar({ value, color = '#8b5cf6', height = 6, showLabel = false }: ProgressBarProps) {
+export function ProgressBar({ value, color = '#ffffff', height = 6, showLabel = false }: ProgressBarProps) {
   const clampedValue = Math.min(100, Math.max(0, value));
 
   return (

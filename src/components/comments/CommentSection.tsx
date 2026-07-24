@@ -57,7 +57,7 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
   const renderContent = (content: string) => {
     const parts = content.split(/(@[a-zA-Z0-9_.-]+)/g);
     return parts.map((part, i) => 
-      part.startsWith('@') ? <span key={i} className="font-medium text-violet-400">{part}</span> : part
+      part.startsWith('@') ? <span key={i} className="font-medium text-white/70">{part}</span> : part
     );
   };
 
@@ -78,7 +78,7 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
                   {comment.authorPhotoURL ? (
                     <Image src={comment.authorPhotoURL} alt={comment.authorName} width={32} height={32} className="h-8 w-8 rounded-full object-cover" unoptimized />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 text-xs font-bold text-white shadow-inner">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10  text-xs font-bold  text-white shadow-inner">
                       {getInitials(comment.authorName, '')}
                     </div>
                   )}
@@ -95,7 +95,7 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
                 {user?.uid === comment.authorId && (
                   <button 
                     onClick={() => handleDelete(comment.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-red-400/50 hover:text-red-400"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-white/70/50 hover:text-white/70"
                   >
                     <TrashIcon size={14} />
                   </button>
@@ -110,18 +110,18 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment... Use @ to mention someone"
-            className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 pr-12 text-sm text-white placeholder:text-white/30 focus:border-violet-500/50 focus:bg-white/[0.04] focus:outline-none"
+            className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 pr-12 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:bg-white/[0.04] focus:outline-none"
             rows={2}
           />
           <button
             type="submit"
             disabled={!newComment.trim() || loading}
-            className="absolute bottom-3 right-3 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-violet-500 disabled:opacity-50"
+            className="absolute bottom-3 right-3 rounded-lg bg-white text-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white text-black disabled:opacity-50"
           >
             {loading ? '...' : 'Post'}
           </button>
         </form>
-        {error && <p className="text-xs text-red-400">{error}</p>}
+        {error && <p className="text-xs text-white/70">{error}</p>}
       </div>
     </div>
   );

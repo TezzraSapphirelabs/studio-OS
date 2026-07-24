@@ -29,7 +29,7 @@ function docToProject(id: string, data: DocumentData): Project {
     name: data.name ?? '',
     description: data.description ?? '',
     status: data.status ?? 'active',
-    color: data.color ?? '#8b5cf6',
+    color: data.color ?? '#ffffff',
     icon: data.icon ?? undefined,
     memberCount: data.memberCount ?? 0,
     taskCount: data.taskCount ?? 0,

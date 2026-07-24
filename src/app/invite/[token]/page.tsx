@@ -68,7 +68,7 @@ export default function InviteLandingPage() {
   if (authLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#07070a]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-white/20 border-t-transparent" />
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function InviteLandingPage() {
       <GlassCard padding="lg" className="w-full max-w-md text-center">
         {status === 'verifying' && (
           <div className="flex flex-col items-center">
-            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-transparent" />
             <h2 className="text-xl font-bold text-white">Accepting Invitation...</h2>
             <p className="mt-2 text-white/50">Please wait while we add you to the project.</p>
           </div>
@@ -86,7 +86,7 @@ export default function InviteLandingPage() {
         
         {status === 'error' && (
           <div className="flex flex-col items-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] text-white/70">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </div>
             <h2 className="text-xl font-bold text-white">Invalid Invitation</h2>
@@ -102,7 +102,7 @@ export default function InviteLandingPage() {
 
         {status === 'success' && (
           <div className="flex flex-col items-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] text-white/70">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             </div>
             <h2 className="text-xl font-bold text-white">Welcome to the Project!</h2>

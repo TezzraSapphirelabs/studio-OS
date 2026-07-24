@@ -67,7 +67,7 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
           download={file.name}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors font-medium"
+          className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg transition-colors font-medium"
         >
           Download File
         </a>
@@ -105,7 +105,7 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
             </a>
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] text-white/70 hover:bg-rose-500/20 hover:text-rose-400 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] text-white/70 hover:bg-white/10 hover:text-white/70 transition-colors"
               title="Close"
             >
               <XIcon size={16} />

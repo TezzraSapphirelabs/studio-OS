@@ -9,4 +9,4 @@ export * from './avatar';
 export * from './select';
 export * from './textarea';
 export * from './layout';
-export * from './table';
+export * from './table';export * from './glass-modal';

@@ -93,10 +93,10 @@ export default function DeleteAccountModal({
         onClick={!loading ? onClose : undefined} 
       />
       
-      <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl border border-red-500/20 bg-[#0c0c0e] shadow-2xl">
+      <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl border border-white/10 bg-[#0c0c0e] shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/5 p-5">
-          <h2 className="text-xl font-bold text-red-500">Delete Account</h2>
+          <h2 className="text-xl font-bold text-white/70">Delete Account</h2>
           <button
             onClick={onClose}
             disabled={loading}
@@ -109,7 +109,7 @@ export default function DeleteAccountModal({
         <div className="p-6">
           {validationError ? (
             <div className="space-y-4">
-              <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/70">
                 {validationError}
               </div>
               <button
@@ -121,9 +121,9 @@ export default function DeleteAccountModal({
             </div>
           ) : step === 1 ? (
             <div className="space-y-5">
-              <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4">
-                <p className="text-sm font-medium text-red-400">Warning: Irreversible Action</p>
-                <p className="mt-2 text-xs text-red-400/80">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                <p className="text-sm font-medium text-white/70">Warning: Irreversible Action</p>
+                <p className="mt-2 text-xs text-white/70/80">
                   This will permanently delete your account, profile, pending invitations, and activity history. You will lose access to all collaborative projects immediately.
                 </p>
               </div>
@@ -137,14 +137,14 @@ export default function DeleteAccountModal({
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder="DELETE"
-                  className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50"
+                  className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-white/20/50 focus:ring-1 focus:ring-white/20"
                 />
               </div>
 
               <button
                 onClick={handleNextStep}
                 disabled={confirmText !== 'DELETE' || loading}
-                className="w-full rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white shadow-lg shadow-red-600/20 transition-all hover:bg-red-500 active:scale-95 disabled:opacity-50"
+                className="w-full rounded-xl bg-white/10 py-2.5 text-sm font-medium text-white shadow-lg shadow-white/10 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50"
               >
                 {loading ? 'Checking projects...' : 'Continue to Re-authentication'}
               </button>
@@ -156,7 +156,7 @@ export default function DeleteAccountModal({
               </p>
               
               {error && (
-                <p className="text-sm font-medium text-red-400">{error}</p>
+                <p className="text-sm font-medium text-white/70">{error}</p>
               )}
 
               {isPasswordProvider ? (
@@ -166,12 +166,12 @@ export default function DeleteAccountModal({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Current Password"
-                    className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50"
+                    className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50"
                   />
                   <button
                     onClick={handleDelete}
                     disabled={!password || loading}
-                    className="mt-4 w-full rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-red-500 disabled:opacity-50"
+                    className="mt-4 w-full rounded-xl bg-white/10 py-2.5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50"
                   >
                     {loading ? 'Deleting...' : 'Permanently Delete Account'}
                   </button>

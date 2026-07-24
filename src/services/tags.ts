@@ -20,7 +20,7 @@ function docToTag(id: string, data: DocumentData): Tag {
     id,
     workspaceId: data.workspaceId ?? '',
     name: data.name ?? '',
-    color: data.color ?? '#3b82f6',
+    color: data.color ?? '#f4f4f5',
     priority: data.priority ?? false,
     status: data.status ?? false,
     createdAt: data.createdAt ?? new Date().toISOString(),

@@ -16,7 +16,7 @@ export interface StatCardProps extends Omit<GlassCardProps, 'padding' | 'hover' 
 }
 
 export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
-  ({ label, value, icon, trend, trendUp, accentColor = '#8b5cf6', href, ...props }, ref) => {
+  ({ label, value, icon, trend, trendUp, accentColor = '#ffffff', href, ...props }, ref) => {
     return (
       <GlassCard ref={ref} href={href} hover padding="md" {...props}>
         {/* Accent glow */}
@@ -31,7 +31,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             <p className="mt-2 text-3xl font-bold tracking-tight text-white">{value}</p>
             {trend && (
               <p className={`mt-1 text-xs font-medium ${
-                trendUp ? 'text-emerald-400' : 'text-rose-400'
+                trendUp ? 'text-white/70' : 'text-white/70'
               }`}>
                 {trend}
               </p>

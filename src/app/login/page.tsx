@@ -139,8 +139,8 @@ function LoginContent() {
               className="w-full"
             >
               {error && (
-                <motion.div variants={FADE_UP} className="mb-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                <motion.div variants={FADE_UP} className="mb-6 p-3.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white/10 shrink-0" />
                   <p className="text-[13px] text-red-200 leading-tight">{error}</p>
                 </motion.div>
               )}

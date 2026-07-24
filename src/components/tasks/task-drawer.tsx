@@ -39,15 +39,15 @@ export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, 
           <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
             <div className="flex items-center gap-3">
               <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                task.status === 'done' ? 'bg-emerald-500/10' : 'bg-white/[0.04]'
+                task.status === 'done' ? 'bg-white/[0.04]' : 'bg-white/[0.04]'
               }`}>
-                <CheckSquareIcon size={16} className={task.status === 'done' ? 'text-emerald-400' : 'text-white/30'} />
+                <CheckSquareIcon size={16} className={task.status === 'done' ? 'text-white/70' : 'text-white/30'} />
               </div>
               <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                 task.status === 'done'
-                  ? 'bg-emerald-500/10 text-emerald-400'
+                  ? 'bg-white/[0.04] text-white/70'
                   : task.status === 'in-progress'
-                    ? 'bg-blue-500/10 text-blue-400'
+                    ? 'bg-white/[0.04] text-white/70'
                     : 'bg-white/[0.04] text-white/40'
               }`}>
                 {TASK_STATUS_LABELS[task.status]}
@@ -64,7 +64,7 @@ export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, 
               </button>
               <button
                 onClick={onDelete}
-                className="rounded-lg p-2 text-white/40 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/70"
                 title="Delete Task"
               >
                 <TrashIcon size={18} />
@@ -88,7 +88,7 @@ export function TaskDrawer({ isOpen, onClose, task, project, tags = [], onEdit, 
               <div>
                 <span className="mb-1 block text-xs font-medium text-white/40">Project</span>
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: project?.color || '#8b5cf6' }} />
+                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: project?.color || '#ffffff' }} />
                   <span className="text-sm font-medium text-white/80">{project?.name || 'Unknown'}</span>
                 </div>
               </div>

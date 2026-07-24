@@ -1,20 +1,34 @@
 import * as React from "react"
-import { Input as InputPrimitive } from "@base-ui/react/input"
-
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <InputPrimitive
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon?: React.ReactNode;
 }
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, icon, ...props }, ref) => {
+    return (
+      <div className="relative w-full">
+        {icon && (
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none">
+            {icon}
+          </div>
+        )}
+        <input
+          type={type}
+          className={cn(
+            "h-10 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50",
+            icon ? "pl-10 pr-4" : "px-4",
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      </div>
+    )
+  }
+)
+Input.displayName = "Input"
 
 export { Input }

@@ -8,10 +8,42 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { NAV_ITEMS, APP_NAME } from '@/lib/constants';
-import { iconMap, LogOutIcon, XIcon } from './icons';
+import { cn } from '@/lib/utils';
+import { 
+  LayoutDashboard, 
+  FolderKanban, 
+  CheckSquare, 
+  CalendarDays, 
+  StickyNote,
+  BarChart2,
+  Tag,
+  Sparkles, 
+  FileBox, 
+  Users, 
+  Bell, 
+  Settings,
+  LogOut
+} from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { getDisplayName, getInitials } from '@/utils';
+
+const NAV_ITEMS = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Projects", href: "/projects", icon: FolderKanban },
+  { label: "Tasks", href: "/tasks", icon: CheckSquare },
+  { label: "Notes", href: "/notes", icon: StickyNote },
+  { label: "Calendar", href: "/calendar", icon: CalendarDays },
+  { label: "Files", href: "/files", icon: FileBox },
+  { label: "Analytics", href: "/analytics", icon: BarChart2 },
+  { label: "Tags", href: "/tags", icon: Tag },
+  { label: "AI Workspace", href: "/ai", icon: Sparkles },
+  { label: "Team", href: "/team", icon: Users },
+];
+
+const BOTTOM_ITEMS = [
+  { label: "Notifications", href: "/notifications", icon: Bell },
+  { label: "Settings", href: "/settings", icon: Settings },
+];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,111 +54,106 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, userProfile, logout } = useAuth();
 
+  const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
+    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+    const Icon = item.icon;
+
+    return (
+      <Link
+        href={item.href}
+        onClick={onClose}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative",
+          isActive 
+            ? "bg-white/[0.08] text-white font-medium shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" 
+            : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+        )}
+      >
+        {isActive && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+        )}
+        <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-white/40 group-hover:text-white/70 transition-colors")} />
+        <span className="text-sm">{item.label}</span>
+      </Link>
+    );
+  };
+
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Mobile Backdrop */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed inset-y-0 left-0 z-50 flex w-72 flex-col
-          border-r border-white/[0.06]
-          bg-[#0a0a0f]/80 backdrop-blur-2xl
-          transition-transform duration-300 ease-in-out
-          lg:static lg:translate-x-0
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
+        className={cn(
+          "glass-panel fixed lg:sticky top-0 left-0 h-full w-64 rounded-[24px] z-50 flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}
       >
-        {/* Logo */}
-        <div className="flex h-16 items-center justify-between px-6">
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 shadow-lg shadow-violet-500/25 transition-shadow group-hover:shadow-violet-500/40">
-              <span className="text-sm font-bold text-white">S</span>
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-white">
-              {APP_NAME}
+        {/* Mobile Header */}
+        <div className="h-16 flex items-center lg:hidden px-6 border-b border-white/[0.08]">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+            <span className="text-[13px] font-semibold tracking-widest uppercase text-white/90">
+              Studio OS
             </span>
-          </Link>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
-          >
-            <XIcon size={18} />
-          </button>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="mt-4 flex-1 space-y-1 px-3">
-          {NAV_ITEMS.map((item) => {
-            const Icon = iconMap[item.icon];
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onClose}
-                className={`
-                  group relative flex items-center gap-3 rounded-xl px-3 py-2.5
-                  text-sm font-medium transition-all duration-200
-                  ${isActive
-                    ? 'bg-white/[0.08] text-white shadow-sm'
-                    : 'text-white/50 hover:bg-white/[0.04] hover:text-white/80'
-                  }
-                `}
-              >
-                {isActive && (
-                  <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-gradient-to-b from-violet-400 to-fuchsia-500" />
-                )}
-                {Icon && <Icon size={18} className={isActive ? 'text-violet-400' : ''} />}
-                <span>{item.label}</span>
-                {item.badge && item.badge > 0 && (
-                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-violet-500/20 px-1.5 text-[10px] font-semibold text-violet-300">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Main Nav */}
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 scrollbar-hide">
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/30 px-3 pb-2">
+            Workspace
+          </div>
+          {NAV_ITEMS.map((item) => (
+            <NavItem key={item.href} item={item} />
+          ))}
+        </div>
 
-        {/* Bottom section */}
-        <div className="border-t border-white/[0.06] p-4">
-          <div className="flex items-center gap-3 rounded-xl p-2">
+        {/* Bottom Nav */}
+        <div className="px-4 border-t border-white/[0.08] space-y-1 pt-4 pb-2">
+          {BOTTOM_ITEMS.map((item) => (
+            <NavItem key={item.href} item={item} />
+          ))}
+        </div>
+
+        {/* User Profile */}
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-3 rounded-xl p-2 bg-white/[0.02] border border-white/[0.04]">
             {user?.photoURL ? (
               <Image 
                 src={user.photoURL} 
                 alt="Profile" 
-                width={36}
-                height={36}
-                className="h-9 w-9 rounded-full object-cover border border-white/[0.08]"
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover border border-white/[0.08]"
                 unoptimized
               />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-xs font-bold text-white">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white  text-xs font-bold  text-black shadow-inner">
                 {getInitials(userProfile?.displayName || user?.displayName, user?.email)}
               </div>
             )}
             
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-white">
+              <p className="truncate text-xs font-medium text-white/90">
                 {userProfile?.displayName || getDisplayName(user)}
               </p>
-              <p className="truncate text-xs text-white/40">
+              <p className="truncate text-[10px] text-white/40">
                 {user?.email || ''}
               </p>
             </div>
             <button 
               onClick={logout}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.06] hover:text-white/60"
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-white/30 transition-colors hover:bg-white/[0.08] hover:text-white"
               title="Sign Out"
             >
-              <LogOutIcon size={16} />
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

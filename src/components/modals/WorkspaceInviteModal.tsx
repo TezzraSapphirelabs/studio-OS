@@ -60,7 +60,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
         <div className="p-6">
           {success ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] text-white/70">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                   <polyline points="22 4 12 14.01 9 11.01" />
@@ -72,7 +72,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
           ) : (
             <form onSubmit={handleInvite} className="space-y-5">
               {error && (
-                <div className="rounded-xl border border-red-500/20 bg-red-500/[0.05] px-4 py-3 text-sm text-red-400">
+                <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/70">
                   {error}
                 </div>
               )}
@@ -85,7 +85,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="colleague@example.com"
                   required
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors hover:bg-white/[0.04] focus:border-violet-500/50 focus:bg-white/[0.04]"
+                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors hover:bg-white/[0.04] focus:border-white/20 focus:bg-white/[0.04]"
                 />
               </div>
 
@@ -94,7 +94,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as WorkspaceRole)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#09090b] px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/[0.04] focus:border-violet-500/50"
+                  className="w-full rounded-xl border border-white/[0.08] bg-[#09090b] px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/[0.04] focus:border-white/20"
                 >
                   <option value="admin" className="bg-[#0a0a0f] text-white">Admin (Full Access to all projects)</option>
                   <option value="member" className="bg-[#0a0a0f] text-white">Member (Access assigned projects only)</option>
@@ -106,7 +106,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full rounded-xl bg-violet-600 px-4 py-3 text-sm font-medium text-white shadow hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 focus:ring-offset-[#09090b] disabled:opacity-50 transition-colors"
+                  className="w-full rounded-xl bg-white text-black px-4 py-3 text-sm font-medium text-white shadow hover:bg-white text-black focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#09090b] disabled:opacity-50 transition-colors"
                 >
                   {loading ? 'Sending Invite...' : 'Send Invitation'}
                 </button>

@@ -30,9 +30,9 @@ export function FileGrid({
   onContextMenu,
 }: FileGridProps) {
   const getFileIcon = (type: string) => {
-    if (type.startsWith('image/')) return <ImageIcon size={32} className="text-violet-400" />;
-    if (type === 'application/pdf') return <PdfIcon size={32} className="text-rose-400" />;
-    if (type.startsWith('text/') || type.includes('markdown')) return <FileTextIcon size={32} className="text-blue-400" />;
+    if (type.startsWith('image/')) return <ImageIcon size={32} className="text-white/70" />;
+    if (type === 'application/pdf') return <PdfIcon size={32} className="text-white/70" />;
+    if (type.startsWith('text/') || type.includes('markdown')) return <FileTextIcon size={32} className="text-white/70" />;
     return <FilesIcon size={32} className="text-white/40" />;
   };
 
@@ -41,11 +41,11 @@ export function FileGrid({
       {folders.map((folder) => (
         <div
           key={folder.id}
-          className="group relative flex cursor-pointer flex-col items-center rounded-2xl border border-white/[0.04] bg-white/[0.02] p-4 text-center transition-all hover:bg-white/[0.06] hover:border-white/[0.1]"
+          className="group relative flex cursor-pointer flex-col items-center glass-panel p-4 text-center transition-all hover:bg-white/[0.06] hover:border-white/[0.1]"
           onClick={() => onFolderClick(folder)}
           onContextMenu={(e) => onContextMenu(e, folder, 'folder')}
         >
-          <FolderIcon size={48} className="mb-3 text-violet-500" />
+          <FolderIcon size={48} className="mb-3 text-white/70" />
           <h3 className="w-full truncate text-sm font-medium text-white/90">
             {folder.name}
           </h3>
@@ -65,7 +65,7 @@ export function FileGrid({
       {files.map((file) => (
         <div
           key={file.id}
-          className="group relative flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-white/[0.04] bg-white/[0.02] p-4 text-center transition-all hover:bg-white/[0.06] hover:border-white/[0.1]"
+          className="group relative flex cursor-pointer flex-col items-center justify-center glass-panel p-4 text-center transition-all hover:bg-white/[0.06] hover:border-white/[0.1]"
           onClick={() => onFileClick(file)}
           onContextMenu={(e) => onContextMenu(e, file, 'file')}
         >

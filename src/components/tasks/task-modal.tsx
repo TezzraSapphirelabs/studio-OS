@@ -94,7 +94,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
 
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
-            <div className="mb-6 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="mb-6 rounded-lg bg-white/[0.04] p-3 text-sm text-white/70">
               {error}
             </div>
           )}
@@ -103,13 +103,13 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
             {/* Title & Description */}
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/70">Task Title <span className="text-red-400">*</span></label>
+                <label className="mb-1.5 block text-xs font-medium text-white/70">Task Title <span className="text-white/70">*</span></label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="E.g., Design new landing page"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                   autoFocus
                 />
               </div>
@@ -121,7 +121,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Add more details about this task..."
                   rows={4}
-                  className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                  className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                 />
               </div>
             </div>
@@ -130,13 +130,13 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
               {/* Project & Assignee */}
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/70">Project <span className="text-red-400">*</span></label>
+                  <label className="mb-1.5 block text-xs font-medium text-white/70">Project <span className="text-white/70">*</span></label>
                   <div className="relative">
                     <FolderIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
                     <select
                       value={projectId}
                       onChange={(e) => setProjectId(e.target.value)}
-                      className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                      className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                       disabled={!!taskToEdit} // Can't change project of existing task currently
                     >
                       <option value="" disabled className="bg-[#0f0f13]">Select Project</option>
@@ -156,7 +156,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                       value={assigneeId}
                       onChange={(e) => setAssigneeId(e.target.value)}
                       placeholder="Assign to..."
-                      className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                     />
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                   >
                     <option value="todo" className="bg-[#0f0f13]">To Do</option>
                     <option value="in-progress" className="bg-[#0f0f13]">In Progress</option>
@@ -182,7 +182,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                   >
                     <option value="low" className="bg-[#0f0f13]">Low</option>
                     <option value="medium" className="bg-[#0f0f13]">Medium</option>
@@ -201,7 +201,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-violet-500 focus:bg-white/10 [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10 [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -215,7 +215,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
                     placeholder="e.g. bug, feature, urgent"
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-violet-500 focus:bg-white/10"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
                   />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 disabled:opacity-50"
+                className="rounded-xl bg-white  px-5 py-2 text-sm font-semibold  text-black shadow-lg transition-all hover:brightness-110 disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : taskToEdit ? 'Save Changes' : 'Create Task'}
               </button>

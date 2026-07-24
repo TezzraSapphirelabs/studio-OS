@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { type Note } from '@/types';
 import { updateNote } from '@/services/notes';
 import { Markdown } from './markdown';
+import { Button } from '@/components/ui';
 import { ArchiveIcon, ArchiveRestoreIcon, ClockIcon } from './icons';
 import { useToast } from '@/contexts/toast-context';
 import { CommentSection } from './comments/CommentSection';
@@ -124,34 +125,35 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
         />
         
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex bg-white/[0.04] p-1 rounded-lg">
+          <div className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-1">
             <button
               onClick={() => setActiveTab('edit')}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'edit' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-white/40 hover:text-white/80'}`}
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${activeTab === 'edit' ? 'bg-white/[0.1] text-white shadow-sm' : 'text-white/40 hover:bg-white/[0.04] hover:text-white'}`}
             >
               Edit
             </button>
             <button
               onClick={() => setActiveTab('preview')}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'preview' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-white/40 hover:text-white/80'}`}
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${activeTab === 'preview' ? 'bg-white/[0.1] text-white shadow-sm' : 'text-white/40 hover:bg-white/[0.04] hover:text-white'}`}
             >
               Preview
             </button>
             <button
               onClick={() => setActiveTab('comments')}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'comments' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-white/40 hover:text-white/80'}`}
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${activeTab === 'comments' ? 'bg-white/[0.1] text-white shadow-sm' : 'text-white/40 hover:bg-white/[0.04] hover:text-white'}`}
             >
               Comments
             </button>
           </div>
           
-          <button
+          <Button
+            variant="icon"
+            size="icon"
             onClick={toggleArchive}
-            className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.04] transition-colors"
             title={note.archived ? "Restore Note" : "Archive Note"}
           >
             {note.archived ? <ArchiveRestoreIcon size={16} /> : <ArchiveIcon size={16} />}
-          </button>
+          </Button>
         </div>
       </div>
       
@@ -190,7 +192,7 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
         </div>
         <div className="flex items-center gap-2">
           {isSaving ? (
-            <span className="text-violet-400">Saving...</span>
+            <span className="text-white/70">Saving...</span>
           ) : (
             <span className="flex items-center gap-1">
               <ClockIcon size={10} />

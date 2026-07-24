@@ -5,19 +5,21 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { SearchIcon, BellIcon, MenuIcon } from './icons';
+import { Search, Bell, Sparkles, User, Menu } from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { subscribeToNotifications, markNotificationRead, markAllNotificationsRead } from '@/services/notifications';
 import { type Notification } from '@/types';
 import Link from 'next/link';
+import Image from 'next/image';
 import { formatDistanceToNow } from 'date-fns';
+import { getInitials } from '@/utils';
 
 interface TopBarProps {
   onMenuClick: () => void;
 }
 
 export function TopBar({ onMenuClick }: TopBarProps) {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPopover, setShowPopover] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -44,47 +46,73 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-[#0a0a0f]/60 px-4 backdrop-blur-xl sm:px-6">
-      {/* Left — menu + search */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onMenuClick}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white lg:hidden"
+    <header className="glass-panel h-16 rounded-[24px] sticky top-0 z-40 flex items-center justify-between px-4 lg:px-8">
+      {/* Left side */}
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={onMenuClick} 
+          className="lg:hidden p-2 rounded-md hover:bg-white/[0.06] transition-colors text-white/70 hover:text-white"
         >
-          <MenuIcon size={20} />
+          <Menu className="w-5 h-5" />
         </button>
-
-        <div className="relative hidden sm:block">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={16} />
-          <input
-            type="text"
-            placeholder="Search anything…"
-            className="h-9 w-64 rounded-xl border border-white/[0.06] bg-white/[0.03] pl-10 pr-4 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-violet-500/50 focus:bg-white/[0.05] focus:ring-1 focus:ring-violet-500/25"
-          />
+        <div className="hidden lg:flex items-center gap-3">
+          <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+          <span className="text-[13px] font-semibold tracking-widest uppercase text-white/90">
+            Studio OS
+          </span>
         </div>
       </div>
 
-      {/* Right — actions */}
-      <div className="flex items-center gap-2 relative" ref={popoverRef}>
+      {/* Center - Search (Arc Command Bar style) */}
+      <div className="flex-1 max-w-xl mx-4">
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="w-4 h-4 text-white/40 group-focus-within:text-white/80 transition-colors" />
+          </div>
+          <input
+            type="text"
+            placeholder="Search commands, projects, files..."
+            className="w-full h-10 bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-4 text-white text-[14px] placeholder:text-white/20 transition-all duration-300 outline-none focus:border-white/20 focus:bg-white/[0.05] hover:bg-white/[0.04]"
+          />
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <div className="hidden sm:flex items-center gap-1">
+              <kbd className="px-2 py-0.5 rounded-[4px] bg-white/[0.05] border border-white/[0.1] text-[10px] text-white/40 font-sans">
+                ⌘
+              </kbd>
+              <kbd className="px-2 py-0.5 rounded-[4px] bg-white/[0.05] border border-white/[0.1] text-[10px] text-white/40 font-sans">
+                K
+              </kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right side */}
+      <div className="flex items-center gap-2 sm:gap-4 relative" ref={popoverRef}>
+        <button className="p-2 rounded-full hover:bg-white/[0.08] transition-colors text-white/60 hover:text-white relative group">
+          <Sparkles className="w-4 h-4" />
+          <span className="absolute -top-1 -right-1 w-2 h-2 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)] opacity-0 group-hover:opacity-100 transition-opacity" />
+        </button>
+        
         <button 
           onClick={() => setShowPopover(!showPopover)}
-          className="relative flex h-9 w-9 items-center justify-center rounded-xl text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white"
+          className="p-2 rounded-full hover:bg-white/[0.08] transition-colors text-white/60 hover:text-white relative"
         >
-          <BellIcon size={18} />
+          <Bell className="w-4 h-4" />
           {unreadCount > 0 && (
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-500 ring-2 ring-[#0a0a0f]" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           )}
         </button>
 
         {/* Notifications Popover */}
         {showPopover && (
-          <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-white/[0.08] bg-[#0f0f13] shadow-2xl z-50 overflow-hidden animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 bg-[#0a0a0f]/50">
+          <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-white/[0.08] bg-[#0f0f13]/90 backdrop-blur-2xl shadow-2xl z-50 overflow-hidden animate-fade-in-up">
+            <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3 bg-white/[0.02]">
               <h4 className="text-sm font-semibold text-white">Notifications</h4>
               {unreadCount > 0 && (
                 <button 
                   onClick={() => user && markAllNotificationsRead(user.uid)}
-                  className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                  className="text-xs text-white/70 hover:text-white/50 transition-colors"
                 >
                   Mark all read
                 </button>
@@ -101,14 +129,14 @@ export function TopBar({ onMenuClick }: TopBarProps) {
                   {notifications.map(n => (
                     <div 
                       key={n.id} 
-                      className={`relative flex flex-col gap-1 p-4 transition-colors hover:bg-white/[0.02] ${!n.read ? 'bg-violet-500/[0.02]' : ''}`}
+                      className={`relative flex flex-col gap-1 p-4 transition-colors hover:bg-white/[0.04] ${!n.read ? 'bg-white/[0.04]' : ''}`}
                       onClick={() => {
                         if (!n.read && user) markNotificationRead(user.uid, n.id);
                         setShowPopover(false);
                       }}
                     >
                       {!n.read && (
-                        <div className="absolute left-1.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-violet-500" />
+                        <div className="absolute left-1.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full bg-white text-black" />
                       )}
                       {n.link ? (
                         <Link href={n.link} className="flex flex-col gap-1 pl-2">
@@ -130,6 +158,18 @@ export function TopBar({ onMenuClick }: TopBarProps) {
             </div>
           </div>
         )}
+
+        <div className="w-[1px] h-4 bg-white/[0.1] mx-1 sm:mx-2" />
+        
+        <Link href="/settings" className="w-8 h-8 rounded-full bg-white/[0.05] border border-white/[0.1] flex items-center justify-center hover:bg-white/[0.1] transition-all overflow-hidden relative group">
+          {user?.photoURL ? (
+            <Image src={user.photoURL} alt="Profile" width={32} height={32} unoptimized />
+          ) : userProfile ? (
+            <span className="text-[10px] font-bold text-white">{getInitials(userProfile.displayName || user?.displayName, user?.email)}</span>
+          ) : (
+            <User className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
+          )}
+        </Link>
       </div>
     </header>
   );

@@ -29,13 +29,12 @@ export const TASK_STATUS_LABELS: Record<string, string> = {
 };
 
 export const PRIORITY_COLORS: Record<string, string> = {
-  low: '#6366f1',
-  medium: '#f59e0b',
-  high: '#f97316',
+  low: '#71717a',
+  medium: '#a1a1aa',
+  high: '#ffffff',
 };
 
 export const PROJECT_COLORS = [
-  '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e', '#f97316', '#eab308',
-  '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6',
+  '#ffffff', '#f4f4f5', '#e4e4e7', '#d4d4d8',
+  '#a1a1aa', '#71717a', '#52525b', '#3f3f46',
 ];

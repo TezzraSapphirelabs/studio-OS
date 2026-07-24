@@ -51,7 +51,7 @@ export function Dropdown({ trigger, items, align = 'right' }: DropdownProps) {
                 }}
                 className={`flex w-full items-center px-4 py-2 text-sm transition-colors ${
                   item.danger 
-                    ? 'text-red-600 hover:bg-red-50' 
+                    ? 'text-white/70 hover:bg-red-50' 
                     : 'text-ds-fg hover:bg-ds-surface hover:text-ds-fg'
                 }`}
               >
