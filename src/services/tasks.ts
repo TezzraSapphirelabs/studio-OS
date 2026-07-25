@@ -250,3 +250,26 @@ export function subscribeToProjectTasks(
     }
   );
 }
+
+export function subscribeToUserTasks(
+  uid: string,
+  onUpdate: (tasks: Task[], error: string | null) => void
+): Unsubscribe {
+  const q = query(
+    collection(db, TASKS_COL),
+    where('ownerUid', '==', uid)
+  );
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const tasks = snapshot.docs
+        .map((d) => docToTask(d.id, d.data()))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      onUpdate(tasks, null);
+    },
+    (error) => {
+      onUpdate([], friendlyError(error));
+    }
+  );
+}

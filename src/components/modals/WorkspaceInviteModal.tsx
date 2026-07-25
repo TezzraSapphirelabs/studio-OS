@@ -1,9 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import { XIcon } from '@/components/icons';
 import { inviteWorkspaceMember } from '@/services/workspace';
 import { type WorkspaceRole } from '@/types';
 import { useToast } from '@/contexts/toast-context';
+import { GlassModal } from '@/components/ui/glass-modal';
+import { Input } from '@/components/ui/input';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface WorkspaceInviteModalProps {
   workspaceId: string;
@@ -43,78 +46,71 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-[#09090b] shadow-2xl animate-fade-in-up">
-        <div className="flex items-center justify-between border-b border-white/[0.04] p-6">
-          <h3 className="text-lg font-semibold text-white">Invite to Workspace</h3>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-1 text-white/40 hover:bg-white/[0.04] hover:text-white transition-colors"
-          >
-            <XIcon size={20} />
-          </button>
-        </div>
-
-        <div className="p-6">
-          {success ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] text-white/70">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              </div>
-              <h4 className="text-lg font-medium text-white">Invitation Sent!</h4>
-              <p className="mt-2 text-sm text-white/60">An invitation has been sent to {email}.</p>
+    <GlassModal
+      isOpen={true}
+      onClose={onClose}
+      title="Invite to Workspace"
+      className="max-w-md p-0 sm:p-0"
+    >
+      <div className="p-6">
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/[0.04] text-white/70">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
             </div>
-          ) : (
-            <form onSubmit={handleInvite} className="space-y-5">
-              {error && (
-                <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/70">
-                  {error}
-                </div>
-              )}
-              
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-white/70">Email Address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="colleague@example.com"
-                  required
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors hover:bg-white/[0.04] focus:border-white/20 focus:bg-white/[0.04]"
-                />
+            <h4 className="text-lg font-medium text-white">Invitation Sent!</h4>
+            <p className="mt-2 text-sm text-white/60">An invitation has been sent to {email}.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleInvite} className="space-y-5">
+            {error && (
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/70">
+                {error}
               </div>
+            )}
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-white/70">Email Address</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="colleague@example.com"
+                required
+              />
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-white/70">Workspace Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as WorkspaceRole)}
-                  className="w-full rounded-xl border border-white/[0.08] bg-[#09090b] px-4 py-3 text-sm text-white outline-none transition-colors hover:bg-white/[0.04] focus:border-white/20"
-                >
-                  <option value="admin" className="bg-[#0a0a0f] text-white">Admin (Full Access to all projects)</option>
-                  <option value="member" className="bg-[#0a0a0f] text-white">Member (Access assigned projects only)</option>
-                  <option value="viewer" className="bg-[#0a0a0f] text-white">Viewer (Global read-only access)</option>
-                </select>
-              </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-white/70">Workspace Role</label>
+              <Select value={role} onValueChange={(val) => setRole(val as WorkspaceRole)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin (Full Access to all projects)</SelectItem>
+                  <SelectItem value="member">Member (Access assigned projects only)</SelectItem>
+                  <SelectItem value="viewer">Viewer (Global read-only access)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl bg-white text-black px-4 py-3 text-sm font-medium text-white shadow hover:bg-white text-black focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#09090b] disabled:opacity-50 transition-colors"
-                >
-                  {loading ? 'Sending Invite...' : 'Send Invitation'}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? 'Sending Invite...' : 'Send Invitation'}
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
-    </div>
+    </GlassModal>
   );
 }
+

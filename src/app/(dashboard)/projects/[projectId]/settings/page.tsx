@@ -6,8 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { useProject } from '../layout';
 import { updateProject, archiveProject, unarchiveProject, deleteProject, type UpdateProjectInput } from '@/services/projects';
 import { GlassCard } from '@/components';
-
-
+import { Button } from '@/components/ui';
 export default function ProjectSettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -134,13 +133,13 @@ export default function ProjectSettingsPage() {
               {/* Removed Color Picker for Monochrome Theme */}
 
               <div className="pt-4 flex justify-end">
-                <button
+                <Button
                   type="submit"
                   disabled={saving}
-                  className="rounded-full bg-white text-black px-6 py-2 text-sm font-medium text-white shadow hover:bg-white text-black focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-[#09090b] disabled:opacity-50"
+                  variant="default"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
-                </button>
+                </Button>
               </div>
             </form>
           </GlassCard>

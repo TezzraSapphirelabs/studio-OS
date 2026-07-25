@@ -74,7 +74,7 @@ service cloud.firestore {
     }
 
     match /tasks/{taskId} {
-      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
       allow create: if request.auth != null && isRole(request.resource.data.projectId, ['owner', 'admin', 'member']);
       allow update: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin'])
@@ -122,7 +122,7 @@ service cloud.firestore {
     }
 
     match /files/{fileId} {
-      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
       allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
       allow update: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
@@ -133,7 +133,7 @@ service cloud.firestore {
     }
 
     match /folders/{folderId} {
-      allow read: if request.auth != null && isProjectMember(resource.data.projectId);
+      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
       allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
       allow update: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
@@ -157,24 +157,48 @@ service cloud.firestore {
     }
 
     // ── Phase 6 Extensions ─────────────────────────────────────
+    
+    function getWorkspaceRole(workspaceId) {
+      return (workspaceId == request.auth.uid)
+        ? 'owner'
+        : (exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid))
+           ? get(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid)).data.role
+           : 'none');
+    }
+
+    function isWorkspaceRole(workspaceId, allowedRoles) {
+      return getWorkspaceRole(workspaceId) in allowedRoles;
+    }
 
     match /workspaceMembers/{memberId} {
       allow read: if request.auth != null && isWorkspaceMember(resource.data.workspaceId);
-      allow create, update, delete: if request.auth != null && (
-        request.resource.data.workspaceId == request.auth.uid || 
-        resource.data.workspaceId == request.auth.uid ||
+      allow create: if request.auth != null && (
+        isWorkspaceRole(request.resource.data.workspaceId, ['owner', 'admin']) ||
+        request.resource.data.userId == request.auth.uid // Allow users to join if they have token (handled via backend mostly, but allowed here if client writes)
+      );
+      allow update: if request.auth != null && (
+        isWorkspaceRole(resource.data.workspaceId, ['owner']) ||
+        (isWorkspaceRole(resource.data.workspaceId, ['admin']) && request.resource.data.role != 'owner' && resource.data.role != 'owner')
+      );
+      allow delete: if request.auth != null && (
+        isWorkspaceRole(resource.data.workspaceId, ['owner']) ||
+        (isWorkspaceRole(resource.data.workspaceId, ['admin']) && resource.data.role != 'owner') ||
         resource.data.userId == request.auth.uid // Allow users to leave workspace
       );
     }
 
     match /workspaceInvites/{inviteId} {
       allow read: if request.auth != null && (
-        isWorkspaceMember(resource.data.workspaceId) || 
+        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) || 
         request.auth.token.email == resource.data.inviteeEmail
       );
-      allow create, update, delete: if request.auth != null && (
-        request.resource.data.workspaceId == request.auth.uid || 
-        resource.data.workspaceId == request.auth.uid ||
+      allow create: if request.auth != null && isWorkspaceRole(request.resource.data.workspaceId, ['owner', 'admin']);
+      allow update: if request.auth != null && (
+        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) ||
+        request.auth.token.email == resource.data.inviteeEmail
+      );
+      allow delete: if request.auth != null && (
+        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) ||
         request.auth.token.email == resource.data.inviteeEmail
       );
     }

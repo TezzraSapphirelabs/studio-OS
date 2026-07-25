@@ -18,7 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Analytics', href: '/analytics', icon: 'trending-up' },
   { label: 'Tags', href: '/tags', icon: 'tag' },
   { label: 'AI Workspace', href: '/ai', icon: 'ai' },
-  { label: 'Team', href: '/team', icon: 'users' },
+  { label: 'Members', href: '/members', icon: 'users' },
   { label: 'Settings', href: '/settings', icon: 'settings' },
 ];
 

@@ -58,6 +58,7 @@ export default function TasksPage() {
   const getProjectName = (projectId: string) =>
     projects.find((p) => p.id === projectId)?.name || 'Unknown';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getProjectColor = (_: string) => '#a1a1aa'; // Monochrome light gray
 
   const priorityDot = (priority: Task['priority']) => (

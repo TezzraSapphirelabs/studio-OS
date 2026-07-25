@@ -14,7 +14,7 @@ import { isUserOnline } from '@/services/presence';
 import { ClockIcon } from '@/components/icons';
 import MemberDrawer from './member-drawer';
 
-export default function TeamPage() {
+export default function MembersPage() {
   const { user } = useAuth();
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
   const [invites, setInvites] = useState<WorkspaceInvite[]>([]);
@@ -109,7 +109,13 @@ export default function TeamPage() {
       case 'admin': return 'bg-white/[0.08] text-white/70 border-white/10';
       case 'member': return 'bg-white/[0.08] text-white/70 border-white/10';
       case 'viewer': return 'bg-white/10 text-white/60 border-white/10';
+      default: return 'bg-white/10 text-white/60 border-white/10';
     }
+  };
+
+  const isInviteExpired = (invite: WorkspaceInvite) => {
+    if (!invite.expiresAt) return false;
+    return new Date(invite.expiresAt) < new Date();
   };
 
   return (
@@ -117,17 +123,19 @@ export default function TeamPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Team Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Members Workspace</h1>
           <p className="mt-1 text-sm text-white/40">
             Manage your workspace members and their roles.
           </p>
         </div>
-        <Button
-          variant="primary"
-          onClick={() => setIsInviteOpen(true)}
-        >
-          Invite Member
-        </Button>
+        {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
+          <Button
+            variant="primary"
+            onClick={() => setIsInviteOpen(true)}
+          >
+            Invite Member
+          </Button>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -147,8 +155,8 @@ export default function TeamPage() {
         </div>
       )}
 
-      {/* Members List */}
-      <GlassCard padding="none" className="overflow-hidden">
+      {/* Members Grid */}
+      <div className="">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-white/80" />
@@ -161,95 +169,110 @@ export default function TeamPage() {
             description={searchQuery ? 'Try adjusting your search query.' : 'Invite your first team member.'}
           />
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredMembers.map(member => {
-              // In reality, this requires lastActive on the user profile which we update via presence service
-              const isOnline = isUserOnline(member.joinedAt); // Mock for now, requires fetching profiles
+              const isOnline = isUserOnline(member.joinedAt);
 
               return (
-                <div 
+                <GlassCard 
                   key={member.id} 
-                  className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.04] cursor-pointer"
+                  padding="lg"
+                  className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
                   onClick={() => setSelectedMember(member)}
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="relative shrink-0">
-                      {member.photoURL ? (
-                        <Image src={member.photoURL} alt={member.displayName} width={40} height={40} className="h-10 w-10 rounded-full object-cover border border-white/[0.08]" unoptimized />
-                      ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white  text-sm font-bold  text-black shadow-inner">
-                          {getInitials(member.displayName, member.email)}
-                        </div>
-                      )}
-                      {/* Presence Dot */}
-                      <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#09090b] ${isOnline ? 'bg-white text-black' : 'bg-gray-500'}`} />
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-start justify-between">
+                      <div className="relative">
+                        {member.photoURL ? (
+                          <Image src={member.photoURL} alt={member.displayName} width={80} height={80} className="h-20 w-20 rounded-full object-cover border border-white/[0.08]" unoptimized />
+                        ) : (
+                          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl font-bold text-black shadow-inner">
+                            {getInitials(member.displayName, member.email)}
+                          </div>
+                        )}
+                        {/* Presence Dot */}
+                        <span className={`absolute bottom-0 right-0 h-5 w-5 rounded-full border-[4px] border-[#0a0a0f] ${isOnline ? 'bg-white text-black' : 'bg-gray-500'}`} />
+                      </div>
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeColor(member.role)}`}>
+                        {member.role}
+                      </span>
                     </div>
                     
-                    <div className="min-w-0 flex-1">
+                    <div>
                       <div className="flex items-center gap-2">
-                        <p className="truncate text-sm font-semibold text-white">
-                          {member.displayName}
-                        </p>
+                        <h3 className="truncate text-lg font-bold tracking-tight text-white">{member.displayName}</h3>
                         {user?.uid === member.userId && (
                           <span className="shrink-0 rounded-full bg-white/[0.08] px-2 py-0.5 text-[10px] font-medium text-white/60">You</span>
                         )}
                       </div>
-                      <p className="truncate text-xs text-white/40">{member.email}</p>
+                      <p className="mt-1 truncate text-sm text-white/40">{member.email}</p>
+                    </div>
+
+                    <div className="mt-2 flex flex-col gap-2 border-t border-white/[0.06] pt-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-white/40">Joined</span>
+                        <span className="font-medium text-white/70">{formatRelativeDate(member.joinedAt)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-white/40">Last Active</span>
+                        <span className="font-medium text-white/70">{isOnline ? 'Online now' : 'Recently'}</span>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <span className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getRoleBadgeColor(member.role)}`}>
-                      {member.role}
-                    </span>
-                  </div>
-                </div>
+                </GlassCard>
               );
             })}
           </div>
         )}
-      </GlassCard>
+      </div>
 
       {/* Pending Invites Section */}
-      {invites.length > 0 && (
+      {(currentUserRole === 'owner' || currentUserRole === 'admin') && invites.length > 0 && (
         <div className="space-y-4 pt-4">
           <h2 className="text-lg font-semibold text-white">Pending Invitations</h2>
-          <GlassCard padding="none" className="overflow-hidden">
-            <div className="divide-y divide-white/[0.04]">
-              {invites.map(invite => (
-                <div 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {invites.map(invite => {
+              const expired = isInviteExpired(invite);
+              return (
+                <GlassCard 
                   key={invite.id} 
-                  className="flex items-center justify-between p-4 sm:p-5 transition-colors hover:bg-white/[0.04] cursor-pointer"
+                  padding="lg"
+                  className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
                   onClick={() => setSelectedInvite(invite)}
                 >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="relative shrink-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04] text-sm font-bold text-white shadow-inner">
-                        {getInitials('', invite.inviteeEmail)}
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-start justify-between">
+                      <div className="relative">
+                        <div className={`flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold shadow-inner ${expired ? 'bg-red-500/20 text-red-300' : 'bg-white/[0.04] text-white'}`}>
+                          {getInitials('', invite.inviteeEmail)}
+                        </div>
+                        {!expired && <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-[4px] border-[#0a0a0f] bg-white/50" title="Pending"><ClockIcon size={12} className="text-[#0a0a0f]" /></span>}
                       </div>
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#09090b] bg-white/50" title="Pending" />
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeColor(invite.role)}`}>
+                        {invite.role}
+                      </span>
                     </div>
                     
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-white">
+                    <div>
+                      <h3 className={`truncate text-lg font-bold tracking-tight ${expired ? 'text-red-300/80' : 'text-white'}`}>
                         {invite.inviteeEmail}
+                      </h3>
+                      <p className={`mt-1 truncate text-sm ${expired ? 'text-red-400/60' : 'text-white/40'}`}>
+                        {expired ? 'Expired' : 'Pending Verification'}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <ClockIcon size={12} className="text-white/40" />
-                        <p className="truncate text-xs text-white/40">Invited {formatRelativeDate(invite.createdAt)}</p>
+                    </div>
+
+                    <div className="mt-2 flex flex-col gap-2 border-t border-white/[0.06] pt-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-white/40">Sent Date</span>
+                        <span className="font-medium text-white/70">{formatRelativeDate(invite.createdAt)}</span>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-4">
-                    <span className={`hidden sm:inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getRoleBadgeColor(invite.role)}`}>
-                      {invite.role}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
+                </GlassCard>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -274,6 +297,7 @@ export default function TeamPage() {
         member={selectedMember}
         invite={selectedInvite}
         currentUserRole={currentUserRole}
+        currentUserId={user?.uid || ''}
         onRoleChange={(newRole) => {
           if (selectedMember) handleRoleChange(selectedMember.id, selectedMember.userId, newRole);
         }}

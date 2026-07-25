@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Search, Bell, Sparkles, User, Menu } from "lucide-react";
+import { Input } from '@/components/ui/input';
 
 export const TopNav = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
   return (
@@ -28,13 +29,11 @@ export const TopNav = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
       {/* Center - Search (Arc Command Bar style) */}
       <div className="flex-1 max-w-xl mx-4">
         <div className="relative group">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="w-4 h-4 text-white/40 group-focus-within:text-white/80 transition-colors" />
-          </div>
-          <input
+          <Input
+            icon={<Search className="w-4 h-4" />}
             type="text"
             placeholder="Search commands, projects, files..."
-            className="w-full h-10 bg-white/[0.03] border border-white/[0.06] rounded-xl pl-10 pr-4 text-white text-[14px] placeholder:text-white/20 transition-all duration-300 outline-none focus:border-white/20 focus:bg-white/[0.05] hover:bg-white/[0.04]"
+            className="w-full pr-20 text-[14px]"
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <div className="hidden sm:flex items-center gap-1">
@@ -67,3 +66,4 @@ export const TopNav = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
     </header>
   );
 };
+

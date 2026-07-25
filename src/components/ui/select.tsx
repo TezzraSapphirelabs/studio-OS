@@ -32,21 +32,29 @@ function SelectTrigger({
   className,
   size = "default",
   children,
+  icon,
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default"
+  icon?: React.ReactNode
 }) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-white/20 data-[state=open]:bg-white/[0.05]",
+        "relative flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 text-sm text-white placeholder:text-white/25 outline-none transition-all focus:border-white/20 focus:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-50 data-[state=open]:border-white/20 data-[state=open]:bg-white/[0.05]",
         size === "sm" && "h-8 rounded-lg px-3 text-xs",
+        icon && "pl-10",
         className
       )}
       {...props}
     >
+      {icon && (
+        <span className="absolute left-3.5 text-white/40 pointer-events-none">
+          {icon}
+        </span>
+      )}
       {children}
       <SelectPrimitive.Icon
         render={

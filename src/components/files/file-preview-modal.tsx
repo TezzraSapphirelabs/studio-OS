@@ -6,6 +6,7 @@ import type { DriveFile } from '@/types';
 import { XIcon, DownloadIcon } from '@/components/icons';
 import { formatBytes } from '@/utils';
 import Image from 'next/image';
+import { buttonVariants } from '@/components/ui/button';
 
 interface FilePreviewModalProps {
   file: DriveFile;
@@ -37,7 +38,7 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
       return (
         <iframe
           src={`${file.url}#toolbar=0`}
-          className="h-full w-full rounded-lg bg-white shadow-2xl"
+          className="h-full w-full rounded-lg bg-[#fafafa] shadow-2xl"
           title={file.name}
         />
       );
@@ -47,7 +48,7 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
       return (
         <iframe
           src={file.url}
-          className="h-full w-full rounded-lg bg-white p-4 shadow-2xl"
+          className="h-full w-full rounded-lg bg-[#fafafa] p-4 shadow-2xl"
           title={file.name}
         />
       );
@@ -67,7 +68,7 @@ export function FilePreviewModal({ file, onClose }: FilePreviewModalProps) {
           download={file.name}
           target="_blank"
           rel="noopener noreferrer"
-          className="px-6 py-2 bg-white text-black hover:bg-white/90 rounded-lg transition-colors font-medium"
+          className={buttonVariants({ variant: 'primary' })}
         >
           Download File
         </a>

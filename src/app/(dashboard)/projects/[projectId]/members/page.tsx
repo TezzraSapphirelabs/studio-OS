@@ -9,6 +9,7 @@ import { type ProjectMember, type ProjectRole } from '@/types';
 import { TrashIcon, UsersIcon } from '@/components/icons';
 
 import { useToast } from '@/contexts/toast-context';
+import { Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 // We'll build the InviteModal next
 import InviteModal from './invite-modal';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -123,13 +124,13 @@ export default function ProjectMembersPage() {
           <p className="text-sm text-white/50 mt-1">Manage who has access to this project.</p>
         </div>
         {isOwnerOrAdmin && (
-          <button
+          <Button
             onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center justify-center gap-2 rounded-full bg-white text-black px-5 py-2.5 text-sm font-medium text-white shadow hover:bg-white text-black focus:outline-none transition-colors"
+            variant="default"
           >
-            <UsersIcon size={18} />
+            <UsersIcon size={18} className="mr-2" />
             Invite Member
-          </button>
+          </Button>
         )}
       </div>
 
@@ -172,16 +173,20 @@ export default function ProjectMembersPage() {
               {isOwnerOrAdmin && member.userId !== project?.ownerUid && member.userId !== user?.uid && (
                 <div className="mt-6 flex items-center justify-end gap-2 border-t border-white/[0.04] pt-4">
                   {true && (
-                    <select
+                    <Select
                       value={member.role}
-                      onChange={(e) => handleRoleChange(member, e.target.value as ProjectRole)}
+                      onValueChange={(val) => handleRoleChange(member, val as ProjectRole)}
                       disabled={actionLoading === member.id}
-                      className="cursor-pointer rounded-lg border border-white/[0.08] bg-white/[0.04] px-2 py-1.5 text-xs font-medium text-white outline-none transition-colors hover:bg-white/[0.08] focus:border-white/20 focus:ring-1 focus:ring-white/20/25 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <option value="admin" className="bg-[#0a0a0f] text-white">Admin</option>
-                      <option value="member" className="bg-[#0a0a0f] text-white">Member</option>
-                      <option value="viewer" className="bg-[#0a0a0f] text-white">Viewer</option>
-                    </select>
+                      <SelectTrigger size="sm" className="w-[110px]">
+                        <SelectValue placeholder="Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="member">Member</SelectItem>
+                        <SelectItem value="viewer">Viewer</SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                   <button
                     onClick={() => handleRemoveMember(member)}

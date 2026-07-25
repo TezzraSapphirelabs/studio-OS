@@ -179,6 +179,25 @@ export default function AIWorkspacePage() {
     }
   };
 
+  // Handle pending AI prompt from Dashboard
+  useEffect(() => {
+    if (!user) return;
+    const pendingPrompt = sessionStorage.getItem('pendingAiPrompt');
+    if (pendingPrompt && conversations.length > 0 && activeConversationId && !fetchingMsgs && !loading) {
+      sessionStorage.removeItem('pendingAiPrompt');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      sendToAI(pendingPrompt);
+    } else if (pendingPrompt && conversations.length === 0 && !activeConversationId && !loading && !fetchingMsgs) {
+       sessionStorage.removeItem('pendingAiPrompt');
+       createConversation(user.uid, 'New Conversation').then(newId => {
+         setActiveConversationId(newId);
+         getConversations(user.uid).then(setConversations);
+         sessionStorage.setItem('pendingAiPrompt', pendingPrompt);
+       });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activeConversationId, fetchingMsgs, loading, conversations.length]);
+
   const handleSend = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || !activeConversationId || loading) return;

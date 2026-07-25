@@ -1,8 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { XIcon, CalendarIcon, FolderIcon, UserIcon, TagIcon } from '@/components/icons';
+import { CalendarIcon, FolderIcon, UserIcon, TagIcon } from '@/components/icons';
 import type { Project, TaskPriority, TaskStatus, Task } from '@/types';
+import { GlassModal } from '@/components/ui/glass-modal';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -32,8 +37,6 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
   const [tagsInput, setTagsInput] = useState(taskToEdit?.tags?.join(', ') || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,180 +74,150 @@ export function TaskModal({ isOpen, onClose, projects, taskToEdit, onSubmit }: T
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
+    <GlassModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={taskToEdit ? 'Edit Task' : 'New Task'}
+      className="max-w-2xl p-0 sm:p-0"
+    >
+      <form onSubmit={handleSubmit} className="p-6">
+        {error && (
+          <div className="mb-6 rounded-lg bg-white/[0.04] p-3 text-sm text-white/70">
+            {error}
+          </div>
+        )}
 
-      {/* Modal */}
-      <div className="relative w-full max-w-2xl scale-100 transform overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f13] shadow-2xl transition-all">
-        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-          <h2 className="text-lg font-semibold text-white">
-            {taskToEdit ? 'Edit Task' : 'New Task'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/5 hover:text-white"
-          >
-            <XIcon size={20} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6">
-          {error && (
-            <div className="mb-6 rounded-lg bg-white/[0.04] p-3 text-sm text-white/70">
-              {error}
+        <div className="space-y-6">
+          {/* Title & Description */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/70">Task Title <span className="text-white/70">*</span></label>
+              <Input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="E.g., Design new landing page"
+                autoFocus
+              />
             </div>
-          )}
+            
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/70">Description</label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add more details about this task..."
+                rows={4}
+              />
+            </div>
+          </div>
 
-          <div className="space-y-6">
-            {/* Title & Description */}
+          <div className="grid gap-6 sm:grid-cols-2">
+            {/* Project & Assignee */}
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/70">Task Title <span className="text-white/70">*</span></label>
-                <input
+                <label className="mb-1.5 block text-xs font-medium text-white/70">Project <span className="text-white/70">*</span></label>
+                <Select value={projectId} onValueChange={(val) => setProjectId(val || '')} disabled={!!taskToEdit}>
+                  <SelectTrigger icon={<FolderIcon size={16} />}>
+                    <SelectValue placeholder="Select Project">
+                      {projects.find(p => p.id === projectId)?.name || "Select Project"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-white/70">Assignee (Email or UID)</label>
+                <Input
                   type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="E.g., Design new landing page"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                  autoFocus
-                />
-              </div>
-              
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/70">Description</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add more details about this task..."
-                  rows={4}
-                  className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
+                  value={assigneeId}
+                  onChange={(e) => setAssigneeId(e.target.value)}
+                  placeholder="Assign to..."
+                  icon={<UserIcon size={16} />}
                 />
               </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              {/* Project & Assignee */}
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/70">Project <span className="text-white/70">*</span></label>
-                  <div className="relative">
-                    <FolderIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                    <select
-                      value={projectId}
-                      onChange={(e) => setProjectId(e.target.value)}
-                      className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                      disabled={!!taskToEdit} // Can't change project of existing task currently
-                    >
-                      <option value="" disabled className="bg-[#0f0f13]">Select Project</option>
-                      {projects.map(p => (
-                        <option key={p.id} value={p.id} className="bg-[#0f0f13]">{p.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/70">Assignee (Email or UID)</label>
-                  <div className="relative">
-                    <UserIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                    <input
-                      type="text"
-                      value={assigneeId}
-                      onChange={(e) => setAssigneeId(e.target.value)}
-                      placeholder="Assign to..."
-                      className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Status & Priority */}
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/70">Status</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as TaskStatus)}
-                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                  >
-                    <option value="todo" className="bg-[#0f0f13]">To Do</option>
-                    <option value="in-progress" className="bg-[#0f0f13]">In Progress</option>
-                    <option value="done" className="bg-[#0f0f13]">Done</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/70">Priority</label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value as TaskPriority)}
-                    className="w-full appearance-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                  >
-                    <option value="low" className="bg-[#0f0f13]">Low</option>
-                    <option value="medium" className="bg-[#0f0f13]">Medium</option>
-                    <option value="high" className="bg-[#0f0f13]">High</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2">
+            {/* Status & Priority */}
+            <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/70">Due Date</label>
-                <div className="relative">
-                  <CalendarIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-white/20 focus:bg-white/10 [color-scheme:dark]"
-                  />
-                </div>
+                <label className="mb-1.5 block text-xs font-medium text-white/70">Status</label>
+                <Select value={status} onValueChange={(val) => setStatus(val as TaskStatus)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">To Do</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-white/70">Labels / Tags</label>
-                <div className="relative">
-                  <TagIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-                  <input
-                    type="text"
-                    value={tagsInput}
-                    onChange={(e) => setTagsInput(e.target.value)}
-                    placeholder="e.g. bug, feature, urgent"
-                    className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-                  />
-                </div>
+                <label className="mb-1.5 block text-xs font-medium text-white/70">Priority</label>
+                <Select value={priority} onValueChange={(val) => setPriority(val as TaskPriority)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/70">Due Date</label>
+              <Input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                icon={<CalendarIcon size={16} />}
+                className="[color-scheme:dark]"
+              />
+            </div>
 
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-xl bg-white  px-5 py-2 text-sm font-semibold  text-black shadow-lg transition-all hover:brightness-110 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Saving...' : taskToEdit ? 'Save Changes' : 'Create Task'}
-              </button>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-white/70">Labels / Tags</label>
+              <Input
+                type="text"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+                placeholder="e.g. bug, feature, urgent"
+                icon={<TagIcon size={16} />}
+              />
             </div>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="mt-8 flex items-center justify-end gap-3 border-t border-white/10 pt-6">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : taskToEdit ? 'Save Changes' : 'Create Task'}
+          </Button>
+        </div>
+      </form>
+    </GlassModal>
   );
 }

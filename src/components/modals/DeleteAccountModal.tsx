@@ -3,6 +3,9 @@ import { useAuth } from '@/contexts/auth-context';
 import { validateAccountDeletion, deleteUserAccountData, reauthenticate } from '@/services/account';
 import { EmailAuthProvider, GoogleAuthProvider } from 'firebase/auth';
 import Image from 'next/image';
+import { GlassModal } from '@/components/ui/glass-modal';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function DeleteAccountModal({
   isOpen,
@@ -87,109 +90,98 @@ export default function DeleteAccountModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={!loading ? onClose : undefined} 
-      />
-      
-      <div className="relative w-full max-w-md animate-fade-in-up rounded-2xl border border-white/10 bg-[#0c0c0e] shadow-2xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/5 p-5">
-          <h2 className="text-xl font-bold text-white/70">Delete Account</h2>
-          <button
-            onClick={onClose}
-            disabled={loading}
-            className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-white"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="p-6">
-          {validationError ? (
-            <div className="space-y-4">
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/70">
-                {validationError}
-              </div>
-              <button
-                onClick={onClose}
-                className="w-full rounded-xl bg-white/[0.06] py-2.5 text-sm font-medium text-white hover:bg-white/[0.1]"
-              >
-                Go Back
-              </button>
+    <GlassModal
+      isOpen={isOpen}
+      onClose={!loading ? onClose : () => {}}
+      title="Delete Account"
+      className="max-w-md p-0 sm:p-0"
+    >
+      <div className="p-6">
+        {validationError ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/70">
+              {validationError}
             </div>
-          ) : step === 1 ? (
-            <div className="space-y-5">
-              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-                <p className="text-sm font-medium text-white/70">Warning: Irreversible Action</p>
-                <p className="mt-2 text-xs text-white/70/80">
-                  This will permanently delete your account, profile, pending invitations, and activity history. You will lose access to all collaborative projects immediately.
-                </p>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-white/70">
-                  Type <strong>DELETE</strong> to confirm
-                </label>
-                <input
-                  type="text"
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="DELETE"
-                  className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-white/20/50 focus:ring-1 focus:ring-white/20"
-                />
-              </div>
-
-              <button
-                onClick={handleNextStep}
-                disabled={confirmText !== 'DELETE' || loading}
-                className="w-full rounded-xl bg-white/10 py-2.5 text-sm font-medium text-white shadow-lg shadow-white/10 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50"
-              >
-                {loading ? 'Checking projects...' : 'Continue to Re-authentication'}
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <p className="text-sm text-white/70">
-                Please re-authenticate to confirm account deletion. This is required for your security.
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              className="w-full"
+            >
+              Go Back
+            </Button>
+          </div>
+        ) : step === 1 ? (
+          <div className="space-y-5">
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+              <p className="text-sm font-medium text-white/70">Warning: Irreversible Action</p>
+              <p className="mt-2 text-xs text-white/70/80">
+                This will permanently delete your account, profile, pending invitations, and activity history. You will lose access to all collaborative projects immediately.
               </p>
-              
-              {error && (
-                <p className="text-sm font-medium text-white/70">{error}</p>
-              )}
-
-              {isPasswordProvider ? (
-                <div>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Current Password"
-                    className="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-2.5 text-white outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50"
-                  />
-                  <button
-                    onClick={handleDelete}
-                    disabled={!password || loading}
-                    className="mt-4 w-full rounded-xl bg-white/10 py-2.5 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50"
-                  >
-                    {loading ? 'Deleting...' : 'Permanently Delete Account'}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleDelete}
-                  disabled={loading}
-                  className="flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-white/[0.08]"
-                >
-                  <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={20} height={20} className="h-5 w-5" unoptimized />
-                  {loading ? 'Deleting...' : 'Sign in with Google to Delete'}
-                </button>
-              )}
             </div>
-          )}
-        </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-white/70">
+                Type <strong>DELETE</strong> to confirm
+              </label>
+              <Input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="DELETE"
+              />
+            </div>
+
+            <Button
+              onClick={handleNextStep}
+              disabled={confirmText !== 'DELETE' || loading}
+              variant="destructive"
+              className="w-full"
+            >
+              {loading ? 'Checking projects...' : 'Continue to Re-authentication'}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <p className="text-sm text-white/70">
+              Please re-authenticate to confirm account deletion. This is required for your security.
+            </p>
+            
+            {error && (
+              <p className="text-sm font-medium text-white/70">{error}</p>
+            )}
+
+            {isPasswordProvider ? (
+              <div>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Current Password"
+                />
+                <Button
+                  onClick={handleDelete}
+                  disabled={!password || loading}
+                  variant="destructive"
+                  className="mt-4 w-full"
+                >
+                  {loading ? 'Deleting...' : 'Permanently Delete Account'}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleDelete}
+                disabled={loading}
+                variant="default"
+                className="flex w-full items-center justify-center gap-3"
+              >
+                <Image src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width={20} height={20} className="h-5 w-5" unoptimized />
+                {loading ? 'Deleting...' : 'Sign in with Google to Delete'}
+              </Button>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </GlassModal>
   );
 }
+

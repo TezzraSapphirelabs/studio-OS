@@ -29,7 +29,7 @@ const NAV_ITEMS = [
   { label: "Analytics", href: "/analytics", icon: BarChart2 },
   { label: "Tags", href: "/tags", icon: Tag },
   { label: "AI Workspace", href: "/ai", icon: Sparkles },
-  { label: "Team", href: "/team", icon: Users },
+  { label: "Members", href: "/members", icon: Users },
 ];
 
 const BOTTOM_ITEMS = [

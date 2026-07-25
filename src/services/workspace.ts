@@ -357,31 +357,36 @@ export async function transferWorkspaceOwnership(
     // 1. Projects
     const projectsQ = query(collection(db, 'projects'), where('ownerUid', '==', currentOwnerId));
     const projectsSnap = await getDocs(projectsQ);
+    const projectIds = projectsSnap.docs.map(d => d.id);
     projectsSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
     
-    // 2. Tasks
-    const tasksQ = query(collection(db, 'tasks'), where('ownerUid', '==', currentOwnerId));
-    const tasksSnap = await getDocs(tasksQ);
-    tasksSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
-    
-    // 3. Notes
-    const notesQ = query(collection(db, 'notes'), where('ownerId', '==', currentOwnerId));
-    const notesSnap = await getDocs(notesQ);
-    notesSnap.forEach(d => batch.update(d.ref, { ownerId: newOwnerId }));
-    
-    // 4. Files & Folders
-    const filesQ = query(collection(db, 'files'), where('ownerUid', '==', currentOwnerId));
-    const filesSnap = await getDocs(filesQ);
-    filesSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
-    
-    const foldersQ = query(collection(db, 'folders'), where('ownerUid', '==', currentOwnerId));
-    const foldersSnap = await getDocs(foldersQ);
-    foldersSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
+    // Process related collections per project to comply with strict Firestore rules
+    // chunk projectIds for 'in' queries (max 10)
+    for (let i = 0; i < projectIds.length; i += 10) {
+      const chunk = projectIds.slice(i, i + 10);
+      if (chunk.length === 0) continue;
 
-    // 5. Activity
-    const activityQ = query(collection(db, 'activities'), where('projectId', '==', currentOwnerId));
-    const activitySnap = await getDocs(activityQ);
-    activitySnap.forEach(d => batch.update(d.ref, { projectId: newOwnerId }));
+      // 2. Tasks
+      const tasksQ = query(collection(db, 'tasks'), where('projectId', 'in', chunk));
+      const tasksSnap = await getDocs(tasksQ);
+      tasksSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
+
+      // 3. Files & Folders
+      const filesQ = query(collection(db, 'files'), where('projectId', 'in', chunk));
+      const filesSnap = await getDocs(filesQ);
+      filesSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
+      
+      const foldersQ = query(collection(db, 'folders'), where('projectId', 'in', chunk));
+      const foldersSnap = await getDocs(foldersQ);
+      foldersSnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId }));
+
+      // 4. Activity
+      const activityQ = query(collection(db, 'activities'), where('projectId', 'in', chunk));
+      const activitySnap = await getDocs(activityQ);
+      activitySnap.forEach(d => batch.update(d.ref, { ownerUid: newOwnerId })); // assuming ownerUid tracks the workspace owner
+    }
+
+    // 5. Notes (Notes are personal to the user's subcollection)
 
     // 6. Move members from old workspace to new workspace (optional, but good for completeness)
     const membersQ = query(collection(db, WORKSPACE_MEMBERS_COL), where('workspaceId', '==', currentOwnerId));

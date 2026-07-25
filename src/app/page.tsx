@@ -36,7 +36,7 @@ export default function WelcomePage() {
           <Link href="/login" className="text-[13px] font-medium text-white/60 hover:text-white transition-colors">
             Sign In
           </Link>
-          <Link href="/register">
+          <Link href="/login?mode=signup">
             <ShimmerButton className="h-9 px-6 text-[12px]">
               Get Started
             </ShimmerButton>
@@ -72,7 +72,7 @@ export default function WelcomePage() {
             </motion.p>
             
             <motion.div variants={FADE_UP} className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/register">
+              <Link href="/login?mode=signup">
                 <ShimmerButton className="h-14 px-10 text-[15px]">
                   Initialize Workspace <ArrowRight className="w-4 h-4 ml-2" />
                 </ShimmerButton>
@@ -219,7 +219,7 @@ export default function WelcomePage() {
               Join the professionals who have already upgraded their workspace.
             </motion.p>
             <motion.div variants={FADE_UP} className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4">
-              <Link href="/register">
+              <Link href="/login?mode=signup">
                 <ShimmerButton className="h-14 px-12 text-[15px]">
                   Get Started Now
                 </ShimmerButton>

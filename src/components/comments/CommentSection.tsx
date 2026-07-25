@@ -8,6 +8,8 @@ import { formatDistanceToNow } from 'date-fns';
 import Image from 'next/image';
 import { TrashIcon } from '@/components/icons';
 import { getInitials } from '@/utils';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 
 interface CommentSectionProps {
   entityId: string;
@@ -106,20 +108,22 @@ export function CommentSection({ entityId, entityType, projectId }: CommentSecti
         </div>
         
         <form onSubmit={handleSubmit} className="mt-4 relative">
-          <textarea
+          <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment... Use @ to mention someone"
-            className="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 pr-12 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:bg-white/[0.04] focus:outline-none"
+            className="pr-20"
             rows={2}
           />
-          <button
+          <Button
             type="submit"
+            size="sm"
+            variant="primary"
             disabled={!newComment.trim() || loading}
-            className="absolute bottom-3 right-3 rounded-lg bg-white text-black px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white text-black disabled:opacity-50"
+            className="absolute bottom-2 right-2 h-8 px-3 text-xs"
           >
             {loading ? '...' : 'Post'}
-          </button>
+          </Button>
         </form>
         {error && <p className="text-xs text-white/70">{error}</p>}
       </div>

@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { XIcon, CalendarIcon, ClockIcon } from '@/components/icons';
+import { CalendarIcon, ClockIcon } from '@/components/icons';
 import type { CalendarEvent, EventPriority, EventStatus } from '@/types';
 import { createEvent, updateEvent } from '@/services/calendar';
 import { useToast } from '@/contexts/toast-context';
+import { GlassModal } from '@/components/ui/glass-modal';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface EventModalProps {
   onClose: () => void;
@@ -77,75 +82,54 @@ export default function EventModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-md bg-[#1a1a24] border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-          <h2 className="text-lg font-semibold text-white">
-            {existingEvent ? 'Edit Event' : 'New Event'}
-          </h2>
-          <button 
-            onClick={onClose}
-            className="p-2 -mr-2 text-white/50 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
-          >
-            <XIcon size={20} />
-          </button>
-        </div>
-        
-        <div className="overflow-y-auto flex-1">
-          <form id="event-form" onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+    <GlassModal
+      isOpen={true}
+      onClose={onClose}
+      title={existingEvent ? 'Edit Event' : 'New Event'}
+      className="max-w-md p-0 sm:p-0"
+    >
+      <div className="flex max-h-[85vh] flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <form id="event-form" onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
             {/* Title */}
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Title</label>
-              <input
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Title</label>
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Event title"
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
               />
             </div>
             
             {/* Description */}
             <div>
-              <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Description (Optional)</label>
-              <textarea
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Description (Optional)</label>
+              <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add details..."
                 rows={3}
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all resize-none"
               />
             </div>
             
             {/* Date & All Day Toggle */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Date</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/40">
-                    <CalendarIcon size={16} />
-                  </div>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    required
-                    className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
-                    style={{ colorScheme: 'dark' }}
-                  />
-                </div>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Date</label>
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                  icon={<CalendarIcon size={16} />}
+                  className="[color-scheme:dark]"
+                />
               </div>
               
               <div className="flex flex-col justify-end pb-2.5">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex cursor-pointer items-center gap-2">
                   <input
                     type="checkbox"
                     checked={isAllDay}
@@ -161,37 +145,27 @@ export default function EventModal({
             {!isAllDay && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Start Time</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/40">
-                      <ClockIcon size={16} />
-                    </div>
-                    <input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      required
-                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
-                      style={{ colorScheme: 'dark' }}
-                    />
-                  </div>
+                  <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Start Time</label>
+                  <Input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    required
+                    icon={<ClockIcon size={16} />}
+                    className="[color-scheme:dark]"
+                  />
                 </div>
                 
                 <div>
-                  <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">End Time</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/40">
-                      <ClockIcon size={16} />
-                    </div>
-                    <input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      required
-                      className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all"
-                      style={{ colorScheme: 'dark' }}
-                    />
-                  </div>
+                  <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">End Time</label>
+                  <Input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    required
+                    icon={<ClockIcon size={16} />}
+                    className="[color-scheme:dark]"
+                  />
                 </div>
               </div>
             )}
@@ -199,54 +173,56 @@ export default function EventModal({
             <div className="grid grid-cols-2 gap-4">
               {/* Priority */}
               <div>
-                <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Priority</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as EventPriority)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Priority</label>
+                <Select value={priority} onValueChange={(val) => setPriority(val as EventPriority)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               {/* Status */}
               <div>
-                <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Status</label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as EventStatus)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20/50 transition-all [&>option]:bg-[#1a1a24] [&>option]:text-white"
-                >
-                  <option value="upcoming">Upcoming</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                </select>
+                <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">Status</label>
+                <Select value={status} onValueChange={(val) => setStatus(val as EventStatus)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            
           </form>
         </div>
         
-        <div className="px-6 py-4 border-t border-white/5 flex justify-end gap-3 bg-black/20 rounded-b-2xl">
-          <button
+        <div className="flex justify-end gap-3 border-t border-white/10 bg-white/[0.02] px-6 py-4">
+          <Button
             type="button"
+            variant="ghost"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/5"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             form="event-form"
+            variant="primary"
             disabled={isSubmitting || !title.trim()}
-            className="px-6 py-2 text-sm font-medium text-white bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:hover:bg-white text-black rounded-lg shadow-lg shadow-white/10 transition-all"
           >
             {isSubmitting ? 'Saving...' : existingEvent ? 'Save Changes' : 'Create Event'}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </GlassModal>
   );
 }
+

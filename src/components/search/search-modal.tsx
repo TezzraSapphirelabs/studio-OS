@@ -10,6 +10,7 @@ import { fetchWorkspaceMembers } from '@/services/workspace';
 import { subscribeToTags } from '@/services/tags';
 import { SearchIcon, FolderIcon, CheckSquareIcon, FileTextIcon, UserIcon, TagIcon } from '@/components/icons';
 import { type Project, type Note, type WorkspaceMember, type Tag } from '@/types';
+import { GlassModal } from '@/components/ui/glass-modal';
 
 interface SearchModalProps {
   onClose: () => void;
@@ -80,7 +81,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
     // Search Members
     for (const m of members) {
       if (m.displayName.toLowerCase().includes(lowerQ) || m.email.toLowerCase().includes(lowerQ)) {
-        res.push({ type: 'Member', title: m.displayName, subtitle: m.email, icon: <UserIcon size={16} />, href: `/team` });
+        res.push({ type: 'Member', title: m.displayName, subtitle: m.email, icon: <UserIcon size={16} />, href: `/members` });
       }
     }
 
@@ -100,13 +101,14 @@ export function SearchModal({ onClose }: SearchModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f13] shadow-2xl">
-        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+    <GlassModal
+      isOpen={true}
+      onClose={onClose}
+      hideCloseButton
+      className="max-w-2xl p-0 sm:p-0 !mt-[10vh] self-start"
+    >
+      <div className="flex flex-col">
+        <div className="flex items-center gap-3 border-b border-white/[0.08] px-4 py-3">
           <SearchIcon size={20} className="text-white/40" />
           <input
             ref={inputRef}
@@ -136,7 +138,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
                 <button
                   key={i}
                   onClick={() => handleSelect(r.href)}
-                  className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-white/5 focus:bg-white/5 focus:outline-none"
+                  className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-white/[0.06] focus:bg-white/[0.06] focus:outline-none"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-white/70">
                     {r.icon}
@@ -151,6 +153,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
           )}
         </div>
       </div>
-    </div>
+    </GlassModal>
   );
 }
+

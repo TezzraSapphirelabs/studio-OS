@@ -15,7 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: 'https://studio-os.com/register',
+      url: 'https://studio-os.com/login?mode=signup',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,

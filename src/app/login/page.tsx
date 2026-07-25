@@ -27,10 +27,16 @@ const STAGGER = {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, googleLogin, githubLogin, resolveLinking } = useAuth();
+  const { login, register, googleLogin, githubLogin, resolveLinking } = useAuth();
   
+  const initialMode = searchParams.get('mode') === 'signup';
+  const [isSignUp, setIsSignUp] = useState(initialMode);
+
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -40,19 +46,42 @@ function LoginContent() {
   const linkProvider = searchParams.get('provider');
   const isLinking = !!(linkToken && linkEmail && linkProvider);
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please enter both email and password.');
-      return;
+    setError(null);
+
+    if (isSignUp && !isLinking) {
+      if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+        setError('Please fill in all fields.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError('Passwords do not match.');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters long.');
+        return;
+      }
+    } else {
+      if (!email || !password) {
+        setError('Please enter both email and password.');
+        return;
+      }
     }
 
     setLoading(true);
-    setError(null);
     try {
       if (isLinking) {
         await resolveLinking(password, linkProvider || undefined);
         router.push('/dashboard?linked=true');
+      } else if (isSignUp) {
+        const err = await register(email, password, name);
+        if (err) {
+          setError(err);
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         await login(email, password);
         router.push('/dashboard');
@@ -60,7 +89,9 @@ function LoginContent() {
     } catch (err: unknown) {
       setError((err as Error).message || 'Failed to authenticate. Please check your credentials.');
     } finally {
-      setLoading(false);
+      if (!error) {
+        setLoading(false);
+      }
     }
   };
 
@@ -72,7 +103,6 @@ function LoginContent() {
       router.push('/dashboard');
     } catch (err: unknown) {
       setError((err as Error).message || 'Google sign-in failed.');
-    } finally {
       setLoading(false);
     }
   };
@@ -85,9 +115,15 @@ function LoginContent() {
       router.push('/dashboard');
     } catch (err: unknown) {
       setError((err as Error).message || 'GitHub sign-in failed.');
-    } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setError(null);
+    setPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -120,18 +156,20 @@ function LoginContent() {
           {/* Header */}
           <motion.div variants={STAGGER} initial="hidden" animate="show" className="mb-10 text-center">
             <motion.h1 variants={FADE_UP} className="text-[28px] font-semibold tracking-tight text-white mb-2">
-              {isLinking ? 'Link Account' : 'Welcome back'}
+              {isLinking ? 'Link Account' : isSignUp ? 'Create an account' : 'Welcome back'}
             </motion.h1>
             <motion.p variants={FADE_UP} className="text-[14px] text-white/60 font-medium">
               {isLinking 
                 ? `Please authenticate to link your ${linkProvider} account.`
+                : isSignUp 
+                ? 'Join Studio OS today.' 
                 : 'Enter your details to sign in to your workspace.'}
             </motion.p>
           </motion.div>
 
           <AnimatePresence mode="wait">
             <motion.div
-              key={isLinking ? "linking" : "login"}
+              key={isLinking ? "linking" : isSignUp ? "signup" : "login"}
               variants={STAGGER}
               initial="hidden"
               animate="show"
@@ -145,8 +183,24 @@ function LoginContent() {
                 </motion.div>
               )}
 
-              <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <form onSubmit={handleEmailAuth} className="space-y-4">
                 
+                {isSignUp && !isLinking && (
+                  <motion.div variants={FADE_UP} className="space-y-1.5">
+                    <label htmlFor="name" className="text-[12px] font-medium text-white/70 ml-1">Full Name</label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={loading}
+                      className="w-full h-12 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 text-white text-[14px] placeholder:text-white/20 transition-all duration-300 outline-none focus:border-white/20 focus:bg-white/[0.05] hover:bg-white/[0.04]"
+                      placeholder="Jane Doe"
+                      required
+                    />
+                  </motion.div>
+                )}
+
                 <motion.div variants={FADE_UP} className="space-y-1.5">
                   <label htmlFor="email" className="text-[12px] font-medium text-white/70 ml-1">Email</label>
                   <input
@@ -164,7 +218,7 @@ function LoginContent() {
                 <motion.div variants={FADE_UP} className="space-y-1.5">
                   <div className="flex justify-between items-center ml-1 mr-1">
                     <label htmlFor="password" className="text-[12px] font-medium text-white/70">Password</label>
-                    {!isLinking && (
+                    {!isLinking && !isSignUp && (
                       <Link href="/forgot-password" className="text-[11px] text-white/40 hover:text-white/80 transition-colors font-medium">
                         Forgot?
                       </Link>
@@ -182,6 +236,22 @@ function LoginContent() {
                   />
                 </motion.div>
 
+                {isSignUp && !isLinking && (
+                  <motion.div variants={FADE_UP} className="space-y-1.5">
+                    <label htmlFor="confirmPassword" className="text-[12px] font-medium text-white/70 ml-1">Confirm Password</label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading}
+                      className="w-full h-12 bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 text-white text-[14px] placeholder:text-white/20 transition-all duration-300 outline-none focus:border-white/20 focus:bg-white/[0.05] hover:bg-white/[0.04] font-mono tracking-widest"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </motion.div>
+                )}
+
                 <motion.div variants={FADE_UP} className="pt-2">
                   <button
                     type="submit"
@@ -191,7 +261,7 @@ function LoginContent() {
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin text-black" />
                     ) : (
-                      <span>Continue</span>
+                      <span>{isSignUp && !isLinking ? 'Create Account' : 'Continue'}</span>
                     )}
                   </button>
                 </motion.div>
@@ -236,10 +306,14 @@ function LoginContent() {
             className="mt-8 text-center"
           >
             <p className="text-[12px] text-white/50">
-                Don&apos;t have an account?{' '}
-              <Link href="/register" className="text-white hover:text-white/80 font-medium transition-colors">
-                Sign up
-              </Link>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button 
+                type="button"
+                onClick={toggleMode}
+                className="text-white hover:text-white/80 font-medium transition-colors"
+              >
+                {isSignUp ? 'Sign in' : 'Sign up'}
+              </button>
             </p>
           </motion.div>
 

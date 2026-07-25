@@ -26,7 +26,7 @@ import { FileGrid } from '@/components/files/file-grid';
 import { FileList } from '@/components/files/file-list';
 import { FilePreviewModal } from '@/components/files/file-preview-modal';
 import { EmptyState } from '@/components';
-import { Button, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
+import { Button, Input, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, buttonVariants } from '@/components/ui';
 
 type ViewMode = 'grid' | 'list';
 
@@ -254,20 +254,26 @@ export default function FilesPage() {
             
             {/* Breadcrumbs */}
             <div className="flex items-center text-sm text-white/40 mt-0.5">
-              <select 
+              <Select 
                 value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-transparent text-white/70 font-medium hover:text-white/50 focus:outline-none cursor-pointer"
+                onValueChange={(val) => setSelectedProjectId(val || '')}
                 disabled={projects.length === 0}
               >
-                {projects.length === 0 ? (
-                  <option value="" className="bg-[#0f0f13]">No projects found</option>
-                ) : (
-                  projects.map(p => (
-                    <option key={p.id} value={p.id} className="bg-[#0f0f13]">{p.name}</option>
-                  ))
-                )}
-              </select>
+                <SelectTrigger size="sm" className="w-auto min-w-[140px] bg-transparent border-transparent px-2 h-7 text-white/70 font-medium hover:text-white/90">
+                  <SelectValue placeholder="Select Project">
+                    {projects.find(p => p.id === selectedProjectId)?.name || "Select Project"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.length === 0 ? (
+                    <SelectItem value="none" disabled>No projects found</SelectItem>
+                  ) : (
+                    projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
               
               <span className="mx-1.5">/</span>
               
@@ -327,8 +333,8 @@ export default function FilesPage() {
             <span className="hidden sm:inline">New Folder</span>
           </Button>
           
-          <label className="flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-white  px-4 text-sm font-semibold  text-black shadow-lg shadow-white/10 transition-all hover:shadow-white/20 hover:brightness-110 active:scale-[0.98]">
-            <UploadIcon size={16} />
+          <label className={buttonVariants({ variant: 'default', className: 'cursor-pointer' })}>
+            <UploadIcon size={16} className="mr-2" />
             <span className="hidden sm:inline">Upload</span>
             <input 
               type="file" 

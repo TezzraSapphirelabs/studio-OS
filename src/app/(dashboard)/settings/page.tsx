@@ -15,7 +15,7 @@ import Image from 'next/image';
 import { uploadFileToStorage, getFileUrl } from '@/lib/storage/client';
 import { ClockIcon } from '@/components/icons';
 import { EmptyState } from '@/components';
-import { Button, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
+import { Button, Input, Textarea, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Switch } from '@/components/ui';
 
 export default function SettingsPage() {
   const { user, retryRoleSync } = useAuth();
@@ -298,27 +298,19 @@ export default function SettingsPage() {
                     <label className="text-sm font-medium text-white/70 capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => {
+                    <Switch
+                      checked={profile.notificationPreferences?.[key] !== false}
+                      onCheckedChange={(checked) => {
                         const currentPrefs = profile.notificationPreferences || ({} as NonNullable<UserProfile['notificationPreferences']>);
-                        const currentValue = currentPrefs[key] !== false; // Default is true
                         setProfile({
                           ...profile,
                           notificationPreferences: {
                             ...currentPrefs,
-                            [key]: !currentValue
+                            [key]: checked
                           } as NonNullable<UserProfile['notificationPreferences']>
                         });
                       }}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        profile.notificationPreferences?.[key] !== false ? 'bg-white text-black' : 'bg-white/[0.1]'
-                      }`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        profile.notificationPreferences?.[key] !== false ? 'translate-x-6' : 'translate-x-1'
-                      }`} />
-                    </button>
+                    />
                   </div>
                 ))}
               </div>
@@ -326,7 +318,7 @@ export default function SettingsPage() {
 
             <div className="flex justify-end">
               <Button
-                variant="primary"
+                variant="default"
                 type="submit"
                 disabled={isProfileSaving}
               >
@@ -441,7 +433,7 @@ export default function SettingsPage() {
             {isOwner && (
               <div className="flex justify-end">
                 <Button
-                  variant="primary"
+                  variant="default"
                   type="submit"
                   disabled={isWorkspaceSaving}
                 >

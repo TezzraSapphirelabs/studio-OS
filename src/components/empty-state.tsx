@@ -1,5 +1,6 @@
 import React from 'react';
 import { GlassCard } from './glass-card';
+import { Button } from '@/components/ui/button';
 
 export interface EmptyStateProps {
   icon: React.ReactNode;
@@ -34,18 +35,16 @@ export function EmptyState({
         {description}
       </p>
       {actionLabel && onAction && (
-        <button
+        <Button
           onClick={onAction}
-          className={`inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-semibold transition-all active:scale-[0.98] ${
-            primary 
-              ? 'bg-white   text-black shadow-lg shadow-white/10 hover:shadow-white/20 hover:brightness-110'
-              : 'bg-white/[0.08] hover:bg-white/[0.12] text-white'
-          }`}
+          variant={primary ? 'primary' : 'default'}
+          className="gap-2"
         >
           {actionIcon}
           {actionLabel}
-        </button>
+        </Button>
       )}
     </GlassCard>
   );
 }
+

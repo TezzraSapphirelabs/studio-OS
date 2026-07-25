@@ -112,7 +112,7 @@ export function NoteEditor({ note, userId }: NoteEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0a0a0f]">
+    <div className="flex flex-col h-full glass-panel rounded-[24px] overflow-hidden border-none">
       {/* Editor Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/[0.04]">
         <input
