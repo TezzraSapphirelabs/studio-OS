@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { type UserProfile, type UserRole } from '@/types';
@@ -34,7 +34,22 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     updatedAt: now,
   };
 
-  await setDoc(userRef, newProfile);
+  const batch = writeBatch(db);
+  batch.set(userRef, newProfile);
+
+  // Explicit Ownership (Option B): The creator gets a physical workspace member record.
+  const memberRef = doc(db, 'workspaceMembers', `${user.uid}_${user.uid}`);
+  batch.set(memberRef, {
+    workspaceId: user.uid,
+    userId: user.uid,
+    email: user.email || '',
+    displayName: newProfile.displayName,
+    photoURL: newProfile.photoURL,
+    role: 'owner',
+    joinedAt: now,
+  });
+
+  await batch.commit();
 
   return newProfile;
 }

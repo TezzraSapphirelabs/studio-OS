@@ -52,9 +52,7 @@ service cloud.firestore {
 
     // ── Helper: Check if user is a member of a workspace ──
     function isWorkspaceMember(workspaceId) {
-      let isOwner = workspaceId == request.auth.uid;
-      let isMember = exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid));
-      return isOwner || isMember;
+      return exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid));
     }
 
     match /projects/{projectId} {
@@ -159,11 +157,9 @@ service cloud.firestore {
     // ── Phase 6 Extensions ─────────────────────────────────────
     
     function getWorkspaceRole(workspaceId) {
-      return (workspaceId == request.auth.uid)
-        ? 'owner'
-        : (exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid))
+      return exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid))
            ? get(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid)).data.role
-           : 'none');
+           : 'none';
     }
 
     function isWorkspaceRole(workspaceId, allowedRoles) {
@@ -172,13 +168,13 @@ service cloud.firestore {
 
     match /workspaceMembers/{memberId} {
       allow read: if request.auth != null && isWorkspaceMember(resource.data.workspaceId);
-      allow create: if request.auth != null && (
+      allow create: if request.auth != null && request.resource.data.role != 'owner' && (
         isWorkspaceRole(request.resource.data.workspaceId, ['owner', 'admin']) ||
-        request.resource.data.userId == request.auth.uid // Allow users to join if they have token (handled via backend mostly, but allowed here if client writes)
+        request.resource.data.userId == request.auth.uid // Allow users to join via backend validation
       );
-      allow update: if request.auth != null && (
+      allow update: if request.auth != null && request.resource.data.role != 'owner' && (
         isWorkspaceRole(resource.data.workspaceId, ['owner']) ||
-        (isWorkspaceRole(resource.data.workspaceId, ['admin']) && request.resource.data.role != 'owner' && resource.data.role != 'owner')
+        (isWorkspaceRole(resource.data.workspaceId, ['admin']) && resource.data.role != 'owner')
       );
       allow delete: if request.auth != null && (
         isWorkspaceRole(resource.data.workspaceId, ['owner']) ||

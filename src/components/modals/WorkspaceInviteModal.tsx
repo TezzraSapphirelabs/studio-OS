@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { inviteWorkspaceMember } from '@/services/workspace';
+import { createWorkspaceInvite } from '@/app/actions/invites';
 import { type WorkspaceRole } from '@/types';
 import { useToast } from '@/contexts/toast-context';
 import { GlassModal } from '@/components/ui/glass-modal';
@@ -30,7 +30,7 @@ export default function WorkspaceInviteModal({ workspaceId, inviterUid, onClose 
     setError(null);
     setSuccess(false);
 
-    const result = await inviteWorkspaceMember(workspaceId, inviterUid, email, role);
+    const result = await createWorkspaceInvite(workspaceId, email, role, inviterUid);
 
     if (result.error) {
       setError(result.error);

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { acceptInviteByToken } from '@/services/invites';
-import { acceptWorkspaceInviteByToken } from '@/services/workspace';
+import { validateAndAcceptInvite } from '@/app/actions/invites';
 import { GlassCard } from '@/components';
 import { useToast } from '@/contexts/toast-context';
 
@@ -33,8 +33,8 @@ export default function InviteLandingPage() {
       
       if (res.error && res.error.includes('Invalid')) {
         // Fallback to workspace invite
-        const workspaceRes = await acceptWorkspaceInviteByToken(token, user!.uid, user!.email || '');
-        if (workspaceRes.workspaceId) {
+        const workspaceRes = await validateAndAcceptInvite(token, user!.uid);
+        if (workspaceRes.success) {
           setStatus('success');
           toast('Successfully joined the workspace!', 'success');
           setTimeout(() => {

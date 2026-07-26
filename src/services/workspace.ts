@@ -70,25 +70,7 @@ export async function fetchWorkspaceMembers(workspaceId: string): Promise<{ memb
     const q = query(collection(db, WORKSPACE_MEMBERS_COL), where('workspaceId', '==', workspaceId));
     const snap = await getDocs(q);
     
-    // Always append the owner as a virtual member if they aren't explicitly in the collection
     const members = snap.docs.map(d => docToWorkspaceMember(d.id, d.data()));
-    
-    if (!members.find(m => m.userId === workspaceId)) {
-      const ownerDoc = await getDoc(doc(db, 'users', workspaceId));
-      if (ownerDoc.exists()) {
-        const ownerData = ownerDoc.data();
-        members.unshift({
-          id: `${workspaceId}_${workspaceId}`,
-          workspaceId,
-          userId: workspaceId,
-          email: ownerData.email,
-          displayName: ownerData.displayName,
-          photoURL: ownerData.photoURL,
-          role: 'owner',
-          joinedAt: ownerData.createdAt,
-        });
-      }
-    }
     
     return { members };
   } catch (error) {

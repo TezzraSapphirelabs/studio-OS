@@ -5,7 +5,8 @@ import { GlassCard, EmptyState } from '@/components';
 import { Button, Input } from '@/components/ui';
 import { SearchIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
-import { fetchWorkspaceMembers, updateWorkspaceMemberRole, removeWorkspaceMember, fetchWorkspaceInvites, cancelWorkspaceInvite } from '@/services/workspace';
+import { fetchWorkspaceMembers, fetchWorkspaceInvites, cancelWorkspaceInvite } from '@/services/workspace';
+import { updateMemberRole, removeMember } from '@/app/actions/members';
 import type { WorkspaceMember, WorkspaceRole, WorkspaceInvite } from '@/types';
 import WorkspaceInviteModal from '@/components/modals/WorkspaceInviteModal';
 import { getInitials, formatRelativeDate } from '@/utils';
@@ -71,7 +72,7 @@ export default function MembersPage() {
     if (selectedMember && selectedMember.id === memberId) {
       setSelectedMember(prev => prev ? { ...prev, role: newRole } : prev);
     }
-    const { error: updateErr } = await updateWorkspaceMemberRole(workspaceId, userId, newRole, user.uid);
+    const { error: updateErr } = await updateMemberRole(workspaceId, userId, newRole, user.uid);
     if (updateErr) {
       alert(updateErr);
       loadMembers(); // Revert
@@ -84,7 +85,7 @@ export default function MembersPage() {
     
     // Optimistic update
     setMembers(prev => prev.filter(m => m.id !== memberId));
-    const { error: removeErr } = await removeWorkspaceMember(workspaceId, userId, user.uid);
+    const { error: removeErr } = await removeMember(workspaceId, userId, user.uid);
     if (removeErr) {
       alert(removeErr);
       loadMembers(); // Revert
