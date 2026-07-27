@@ -1,4 +1,6 @@
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import fs from 'fs';
 import path from 'path';
 
@@ -8,14 +10,14 @@ function getFirebaseCredentials() {
   if (fs.existsSync(keyPath)) {
     try {
       const keyJson = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
-      return admin.credential.cert(keyJson);
+      return cert(keyJson);
     } catch (e) {
       console.warn('⚠️ Found firebase-admin-key.json but could not parse it.');
     }
   }
   
   if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-    return admin.credential.cert({
+    return cert({
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
@@ -27,16 +29,16 @@ function getFirebaseCredentials() {
 
 const credential = getFirebaseCredentials();
 
-if (!credential && admin.apps.length === 0) {
+if (!credential && getApps().length === 0) {
   console.error('\n❌ CRITICAL: Missing Firebase Admin credentials.');
   console.error('Please either:');
   console.error('  1. Place your service account JSON file at the root as "firebase-admin-key.json"');
   console.error('  2. Set FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY environment variables.\n');
 }
 
-const app = admin.apps.length === 0 ? admin.initializeApp(credential ? { credential } : {
+const app = getApps().length === 0 ? initializeApp(credential ? { credential } : {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-}) : admin.app();
+}) : getApp();
 
-export const adminDb = admin.firestore(app);
-export const adminAuth = admin.auth(app);
+export const adminDb = getFirestore(app);
+export const adminAuth = getAuth(app);
