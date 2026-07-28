@@ -1,7 +1,8 @@
-import { doc, getDoc, setDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, writeBatch } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { type UserProfile, type UserRole } from '@/types';
+import { bootstrapPlatformOwner } from '@/app/actions/platform-keys';
 
 /**
  * Synchronizes the Firebase Auth user with the Firestore users collection.
@@ -15,6 +16,9 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
 
   const userRef = doc(db, 'users', user.uid);
   const userSnap = await getDoc(userRef);
+
+  // Safely attempt to bootstrap if this is the very first user on the platform.
+  const isFirstUser = await bootstrapPlatformOwner(user.uid);
 
   if (userSnap.exists()) {
     // Document exists, return the profile
@@ -34,20 +38,23 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     updatedAt: now,
   };
 
+  
   const batch = writeBatch(db);
   batch.set(userRef, newProfile);
 
-  // Explicit Ownership (Option B): The creator gets a physical workspace member record.
-  const memberRef = doc(db, 'workspaceMembers', `${user.uid}_${user.uid}`);
-  batch.set(memberRef, {
-    workspaceId: user.uid,
-    userId: user.uid,
-    email: user.email || '',
-    displayName: newProfile.displayName,
-    photoURL: newProfile.photoURL,
-    role: 'owner',
-    joinedAt: now,
-  });
+  if (isFirstUser) {
+    // First user ever -> Also gets a personal workspace to start
+    const memberRef = doc(db, 'workspaceMembers', `${user.uid}_${user.uid}`);
+    batch.set(memberRef, {
+      workspaceId: user.uid,
+      userId: user.uid,
+      email: user.email || '',
+      displayName: newProfile.displayName,
+      photoURL: newProfile.photoURL,
+      role: 'owner',
+      joinedAt: now,
+    });
+  }
 
   await batch.commit();
 

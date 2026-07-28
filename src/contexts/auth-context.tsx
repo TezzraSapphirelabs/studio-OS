@@ -9,7 +9,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import {
   login as _login,
   googleLogin as _googleLogin,
@@ -22,6 +22,7 @@ import {
   type LinkingData,
 } from '@/services/auth';
 import { syncUserProfile } from '@/services/db';
+import { collection, query, where, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { type UserRole, type UserProfile } from '@/types';
 
 // ── Types ──────────────────────────────────────────────────
@@ -31,6 +32,8 @@ interface AuthContextValue {
   user: User | null;
   /** The user's role from Firestore, or `null` if not synced or logged out. */
   userRole: UserRole | null;
+  /** True if the user is a Platform Owner. */
+  isPlatformOwner: boolean;
   /** The full user profile from Firestore, or `null`. */
   userProfile: UserProfile | null;
   /** Any error encountered while fetching the user role (e.g., offline). */
@@ -65,6 +68,8 @@ interface AuthContextValue {
   resolveLinking: (password?: string, providerId?: string) => Promise<string | null>;
   /** Retries syncing the user profile (e.g. after network reconnection). */
   retryRoleSync: () => Promise<void>;
+  /** True if the user is a member of at least one workspace */
+  hasWorkspace: boolean | null;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -74,8 +79,10 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [isPlatformOwner, setIsPlatformOwner] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
+  const [hasWorkspace, setHasWorkspace] = useState<boolean | null>(null);
   const [roleLoading, setRoleLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [linkingData, setLinkingData] = useState<LinkingData | null>(null);
@@ -105,6 +112,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       }
+      const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', auth.currentUser.uid));
+      setIsPlatformOwner(platformOwnerSnap.exists());
+      
+      const membersSnap = await getDocs(query(collection(db, 'workspaceMembers'), where('userId', '==', auth.currentUser.uid), limit(1)));
+      setHasWorkspace(!membersSnap.empty);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to sync user profile", error);
@@ -141,6 +153,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
           }
+          const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', firebaseUser.uid));
+          setIsPlatformOwner(platformOwnerSnap.exists());
+          
+          const membersSnap = await getDocs(query(collection(db, 'workspaceMembers'), where('userId', '==', firebaseUser.uid), limit(1)));
+          setHasWorkspace(!membersSnap.empty);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           console.error("Failed to sync user profile", error);
@@ -150,8 +167,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         setUserRole(null);
+        setIsPlatformOwner(false);
         setUserProfile(null);
         setRoleError(null);
+        setHasWorkspace(null);
       }
       setLoading(false);
     });
@@ -259,9 +278,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [linkingData]);
 
-  const value: AuthContextValue = {
+  const value = {
     user,
     userRole,
+    isPlatformOwner,
     userProfile,
     roleError,
     roleLoading,
@@ -278,6 +298,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     cancelLinking,
     resolveLinking,
     retryRoleSync,
+    hasWorkspace,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

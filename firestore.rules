@@ -26,6 +26,19 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    match /platformAccessKeys/{keyId} {
+      allow read, write: if false;
+    }
+
+    match /platformOwners/{ownerId} {
+      allow read: if request.auth != null && request.auth.uid == ownerId;
+      allow write: if false;
+    }
+
+    match /platformAuditLogs/{logId} {
+      allow read, write: if false;
+    }
+
     // Returns the exact role for write operations (bypasses query planner limitations)
     function getProjectRole(projectId) {
       return (exists(/databases/$(database)/documents/projects/$(projectId)) && get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid)
@@ -43,6 +56,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isPlatformOwner() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/platformOwners/$(request.auth.uid));
+    }
+
     // ── Helper: Check if user is a member of a project ──
     function isProjectMember(projectId) {
       let isOwner = get(/databases/$(database)/documents/projects/$(projectId)).data.ownerUid == request.auth.uid;
@@ -58,9 +75,10 @@ service cloud.firestore {
     match /projects/{projectId} {
       allow read: if request.auth != null && (
         resource.data.ownerUid == request.auth.uid ||
-        ('memberUids' in resource.data && request.auth.uid in resource.data.memberUids)
+        ('memberUids' in resource.data && request.auth.uid in resource.data.memberUids) ||
+        isPlatformOwner()
       );
-      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow create: if request.auth != null && (isPlatformOwner() || request.resource.data.ownerUid == request.auth.uid);
       allow update: if request.auth != null && (
         isRole(projectId, ['owner'])
         || (isRole(projectId, ['admin']) && request.resource.data.ownerUid == resource.data.ownerUid)
@@ -68,12 +86,12 @@ service cloud.firestore {
         || (exists(/databases/$(database)/documents/members/$(projectId + "_" + request.auth.uid))
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberUids']))
       );
-      allow delete: if request.auth != null && isRole(projectId, ['owner']);
+      allow delete: if request.auth != null && (isPlatformOwner() || isRole(projectId, ['owner']));
     }
 
     match /tasks/{taskId} {
-      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
-      allow create: if request.auth != null && isRole(request.resource.data.projectId, ['owner', 'admin', 'member']);
+      allow read: if request.auth != null && (resource.data.ownerUid == request.auth.uid || isProjectMember(resource.data.projectId) || isPlatformOwner());
+      allow create: if request.auth != null && (isRole(request.resource.data.projectId, ['owner', 'admin', 'member']) || isPlatformOwner());
       allow update: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin'])
         // Member can update if they are the current assignee, OR if they are assigning it to themselves
@@ -87,26 +105,29 @@ service cloud.firestore {
 
     match /activities/{activityId} {
       allow read: if request.auth != null && (
+        resource.data.ownerUid == request.auth.uid ||
         isProjectMember(resource.data.projectId) || 
         isWorkspaceMember(resource.data.projectId) ||
         ('workspaceId' in resource.data && isWorkspaceMember(resource.data.workspaceId)) ||
-        resource.data.ownerUid == request.auth.uid
+        isPlatformOwner()
       );
       allow create: if request.auth != null && (
+        request.resource.data.ownerUid == request.auth.uid ||
         isRole(request.resource.data.projectId, ['owner', 'admin', 'member']) ||
         isWorkspaceMember(request.resource.data.projectId) ||
-        request.resource.data.ownerUid == request.auth.uid
+        isPlatformOwner()
       );
       allow delete: if request.auth != null && (
+        resource.data.ownerUid == request.auth.uid ||
         isRole(resource.data.projectId, ['owner', 'admin']) || 
-        resource.data.ownerUid == request.auth.uid
+        isPlatformOwner()
       );
     }
 
     match /members/{memberDocId} {
-      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.userId == request.auth.uid);
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isProjectMember(resource.data.projectId) || isPlatformOwner());
       allow create: if request.auth != null && (
-        request.resource.data.userId == request.auth.uid || isRole(request.resource.data.projectId, ['owner', 'admin'])
+        request.resource.data.userId == request.auth.uid || isRole(request.resource.data.projectId, ['owner', 'admin']) || isPlatformOwner()
       );
       allow update: if request.auth != null && (
         isRole(resource.data.projectId, ['owner']) || 
@@ -120,10 +141,10 @@ service cloud.firestore {
     }
 
     match /files/{fileId} {
-      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
-      allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
+      allow read: if request.auth != null && (resource.data.ownerUid == request.auth.uid || isProjectMember(resource.data.projectId) || isPlatformOwner());
+      allow create: if request.auth != null && (isProjectMember(request.resource.data.projectId) || isPlatformOwner());
       allow update: if request.auth != null && (
-        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+        isPlatformOwner() || isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
       );
       allow delete: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
@@ -131,10 +152,10 @@ service cloud.firestore {
     }
 
     match /folders/{folderId} {
-      allow read: if request.auth != null && (isProjectMember(resource.data.projectId) || resource.data.ownerUid == request.auth.uid);
-      allow create: if request.auth != null && isProjectMember(request.resource.data.projectId);
+      allow read: if request.auth != null && (resource.data.ownerUid == request.auth.uid || isProjectMember(resource.data.projectId) || isPlatformOwner());
+      allow create: if request.auth != null && (isProjectMember(request.resource.data.projectId) || isPlatformOwner());
       allow update: if request.auth != null && (
-        isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
+        isPlatformOwner() || isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
       );
       allow delete: if request.auth != null && (
         isRole(resource.data.projectId, ['owner', 'admin']) || resource.data.ownerUid == request.auth.uid
@@ -156,12 +177,14 @@ service cloud.firestore {
     }
 
     match /workspaceMembers/{memberId} {
-      allow read: if request.auth != null && isWorkspaceMember(resource.data.workspaceId);
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isWorkspaceMember(resource.data.workspaceId) || isPlatformOwner());
       allow create: if request.auth != null && request.resource.data.role != 'owner' && (
+        isPlatformOwner() ||
         isWorkspaceRole(request.resource.data.workspaceId, ['owner', 'admin']) ||
         request.resource.data.userId == request.auth.uid // Allow users to join via backend validation
       );
       allow update: if request.auth != null && request.resource.data.role != 'owner' && (
+        isPlatformOwner() ||
         isWorkspaceRole(resource.data.workspaceId, ['owner']) ||
         (isWorkspaceRole(resource.data.workspaceId, ['admin']) && resource.data.role != 'owner')
       );
@@ -180,11 +203,13 @@ service cloud.firestore {
 
     match /comments/{commentId} {
       allow read: if request.auth != null && (
+        resource.data.authorId == request.auth.uid ||
         isProjectMember(resource.data.projectId) || 
         isWorkspaceMember(resource.data.projectId) ||
-        resource.data.authorId == request.auth.uid
+        isPlatformOwner()
       );
       allow create: if request.auth != null && (
+        isPlatformOwner() ||
         isProjectMember(request.resource.data.projectId) || 
         isWorkspaceMember(request.resource.data.projectId) ||
         request.resource.data.authorId == request.auth.uid
@@ -194,14 +219,14 @@ service cloud.firestore {
     // ── Workspaces ─────────────────────────────────────────────
     // Note: workspaceId is currently the ownerUid
     match /workspaces/{workspaceId} {
-      allow read: if isAuthenticated() && isWorkspaceMember(workspaceId);
-      allow write: if isAuthenticated() && workspaceId == request.auth.uid;
+      allow read: if isAuthenticated() && (isWorkspaceMember(workspaceId) || isPlatformOwner());
+      allow write: if isAuthenticated() && (workspaceId == request.auth.uid || isPlatformOwner());
     }
 
     match /tags/{tagId} {
-      allow read: if request.auth != null && isWorkspaceMember(resource.data.workspaceId);
-      allow create: if request.auth != null && isWorkspaceMember(request.resource.data.workspaceId);
-      allow update, delete: if request.auth != null && isWorkspaceMember(resource.data.workspaceId);
+      allow read: if request.auth != null && (isWorkspaceMember(resource.data.workspaceId) || isPlatformOwner());
+      allow create: if request.auth != null && (isWorkspaceMember(request.resource.data.workspaceId) || isPlatformOwner());
+      allow update, delete: if request.auth != null && (isWorkspaceMember(resource.data.workspaceId) || isPlatformOwner());
     }
   }
 }

@@ -22,7 +22,11 @@ import {
   Users, 
   Bell, 
   Settings,
-  LogOut
+  LogOut,
+  Shield,
+  Key,
+  Activity,
+  Globe
 } from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { getDisplayName, getInitials } from '@/utils';
@@ -45,6 +49,15 @@ const BOTTOM_ITEMS = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
+const PLATFORM_ITEMS = [
+  { label: "Dashboard", href: "/platform/dashboard", icon: Globe },
+  { label: "Access Keys", href: "/platform/access-keys", icon: Key },
+  { label: "Owners", href: "/platform/owners", icon: Shield },
+  { label: "Workspaces", href: "/platform/workspaces", icon: LayoutDashboard },
+  { label: "System Health", href: "/platform/health", icon: Activity },
+  { label: "Settings", href: "/platform/settings", icon: Settings },
+];
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -52,7 +65,7 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { user, userProfile, logout } = useAuth();
+  const { user, userProfile, logout, isPlatformOwner } = useAuth();
 
   const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -113,6 +126,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {NAV_ITEMS.map((item) => (
             <NavItem key={item.href} item={item} />
           ))}
+          
+          {isPlatformOwner && (
+            <div className="mt-8">
+              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-indigo-400/70 px-3 pt-6 pb-2 border-t border-white/[0.08]">
+                Platform Admin
+              </div>
+              {PLATFORM_ITEMS.map((item) => (
+                <NavItem key={item.href} item={item} />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Bottom Nav */}

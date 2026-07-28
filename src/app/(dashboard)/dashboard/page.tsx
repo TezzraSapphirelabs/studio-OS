@@ -18,7 +18,7 @@ import { StatCard } from "@/components/stat-card";
 import { useAuth } from "@/contexts/auth-context";
 import { subscribeToProjects } from "@/services/projects";
 import { useAllProjectsTasks } from "@/hooks/use-tasks";
-import type { Project, Task } from "@/types";
+import type { Project } from "@/types";
 import { formatRelativeDate, getCompletionPercent } from "@/utils";
 
 const FADE_UP = {

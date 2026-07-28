@@ -11,7 +11,7 @@ function getFirebaseCredentials() {
     try {
       const keyJson = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
       return cert(keyJson);
-    } catch (e) {
+    } catch {
       console.warn('⚠️ Found firebase-admin-key.json but could not parse it.');
     }
   }

@@ -6,7 +6,7 @@ import {
   collection,
   doc,
   getDocs,
-  getDoc,
+
   query,
   where,
   writeBatch,

@@ -11,7 +11,7 @@ import type { WorkspaceMember, WorkspaceRole } from '@/types';
 import { getInitials, formatRelativeDate } from '@/utils';
 import Image from 'next/image';
 import { isUserOnline } from '@/services/presence';
-import { ClockIcon } from '@/components/icons';
+
 import MemberDrawer from './member-drawer';
 
 export default function MembersPage() {

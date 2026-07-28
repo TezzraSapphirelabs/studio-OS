@@ -4,6 +4,11 @@
 
 export type UserRole = 'Owner' | 'Admin' | 'Developer' | 'Project Manager' | 'Designer' | 'Member' | 'Viewer';
 
+export interface PlatformOwner {
+  userId: string;
+  addedAt: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
