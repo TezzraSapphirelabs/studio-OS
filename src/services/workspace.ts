@@ -13,12 +13,10 @@ import {
   type DocumentData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { type WorkspaceMember, type WorkspaceRole, type WorkspaceInvite } from '@/types';
+import { type WorkspaceMember, type WorkspaceRole } from '@/types';
 import { createActivityRef } from './activity';
-import { sendInvitationEmail } from './invites'; // We can reuse the mock email function
 
 const WORKSPACE_MEMBERS_COL = 'workspaceMembers';
-const WORKSPACE_INVITES_COL = 'workspaceInvites';
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -48,20 +46,6 @@ function docToWorkspaceMember(id: string, data: DocumentData): WorkspaceMember {
   };
 }
 
-function docToWorkspaceInvite(id: string, data: DocumentData): WorkspaceInvite {
-  return {
-    id,
-    workspaceId: data.workspaceId ?? '',
-    inviterUid: data.inviterUid ?? '',
-    inviteeEmail: data.inviteeEmail ?? '',
-    role: data.role ?? 'member',
-    status: data.status ?? 'pending',
-    token: data.token,
-    expiresAt: data.expiresAt,
-    createdAt: data.createdAt ?? new Date().toISOString(),
-    updatedAt: data.updatedAt ?? new Date().toISOString(),
-  };
-}
 
 // ── CRUD Members ───────────────────────────────────────────
 
@@ -130,198 +114,6 @@ export async function removeWorkspaceMember(
 
     await batch.commit();
     return {};
-  } catch (error) {
-    return { error: friendlyError(error) };
-  }
-}
-
-// ── Invites ────────────────────────────────────────────────
-
-export async function inviteWorkspaceMember(
-  workspaceId: string,
-  inviterUid: string,
-  inviteeEmail: string,
-  role: WorkspaceRole
-): Promise<{ invite?: WorkspaceInvite; error?: string }> {
-  try {
-    const emailStr = inviteeEmail.trim().toLowerCase();
-    const inviterDoc = await getDoc(doc(db, 'users', inviterUid));
-    if (inviterDoc.data()?.email === emailStr) {
-      return { error: 'You cannot invite yourself.' };
-    }
-
-    const invitesQ = query(
-      collection(db, WORKSPACE_INVITES_COL),
-      where('workspaceId', '==', workspaceId),
-      where('inviteeEmail', '==', emailStr),
-      where('status', '==', 'pending')
-    );
-    const invitesSnap = await getDocs(invitesQ);
-    if (!invitesSnap.empty) {
-      return { error: 'A pending invitation already exists for this email.' };
-    }
-
-    const now = new Date();
-    const expires = new Date();
-    expires.setDate(now.getDate() + 7);
-    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    const data = {
-      workspaceId,
-      inviterUid,
-      inviteeEmail: emailStr,
-      role,
-      status: 'pending',
-      token,
-      expiresAt: expires.toISOString(),
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    };
-
-    const batch = writeBatch(db);
-    const inviteRef = doc(collection(db, WORKSPACE_INVITES_COL));
-    batch.set(inviteRef, data);
-
-    batch.set(createActivityRef(), {
-      projectId: workspaceId,
-      ownerUid: inviterUid,
-      action: 'invited to workspace',
-      target: emailStr,
-      createdAt: now.toISOString(),
-    });
-
-    await batch.commit();
-    const invite = docToWorkspaceInvite(inviteRef.id, data);
-    
-    // We reuse the existing mock email functionality (which expects a ProjectInvite, but the shapes are similar enough)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendInvitationEmail(invite as any, token);
-
-    return { invite };
-  } catch (error) {
-    return { error: friendlyError(error) };
-  }
-}
-
-export async function fetchWorkspaceInvites(workspaceId: string): Promise<{ invites?: WorkspaceInvite[]; error?: string }> {
-  try {
-    const q = query(
-      collection(db, WORKSPACE_INVITES_COL),
-      where('workspaceId', '==', workspaceId),
-      where('status', '==', 'pending')
-    );
-    const snap = await getDocs(q);
-    const invites = snap.docs.map((d) => docToWorkspaceInvite(d.id, d.data()));
-    return { invites };
-  } catch (error) {
-    return { error: friendlyError(error) };
-  }
-}
-
-export async function cancelWorkspaceInvite(inviteId: string, workspaceId: string, actorUid: string): Promise<{ error?: string }> {
-  try {
-    const batch = writeBatch(db);
-    batch.delete(doc(db, WORKSPACE_INVITES_COL, inviteId));
-    batch.set(createActivityRef(), {
-      projectId: workspaceId,
-      ownerUid: actorUid,
-      action: 'cancelled a workspace invitation',
-      target: '',
-      createdAt: new Date().toISOString(),
-    });
-    await batch.commit();
-    return {};
-  } catch (error) {
-    return { error: friendlyError(error) };
-  }
-}
-
-export async function acceptWorkspaceInvite(
-  inviteId: string,
-  workspaceId: string,
-  userId: string,
-  role: WorkspaceRole,
-): Promise<{ error?: string }> {
-  try {
-    const now = new Date().toISOString();
-
-    const inviteRef = doc(db, WORKSPACE_INVITES_COL, inviteId);
-    const inviteSnap = await getDoc(inviteRef);
-    if (!inviteSnap.exists()) {
-      return { error: 'Invitation not found.' };
-    }
-    const inviteData = inviteSnap.data();
-    if (inviteData.expiresAt && new Date(inviteData.expiresAt) < new Date()) {
-      return { error: 'This invitation has expired.' };
-    }
-
-    // Fetch user profile to populate member doc with display info
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    const userData = userDoc.data();
-
-    const batch = writeBatch(db);
-
-    // 1. Remove the pending invitation
-    batch.delete(inviteRef);
-
-    // 2. Add to workspace members collection
-    const memberRef = doc(db, WORKSPACE_MEMBERS_COL, getWorkspaceMemberDocId(workspaceId, userId));
-    batch.set(memberRef, {
-      workspaceId,
-      userId,
-      email: userData?.email || '',
-      displayName: userData?.displayName || 'Unknown User',
-      photoURL: userData?.photoURL || null,
-      role,
-      joinedAt: now,
-    });
-
-    // 3. Log activity
-    batch.set(createActivityRef(), {
-      projectId: workspaceId,
-      ownerUid: userId,
-      action: 'joined the workspace',
-      target: userData?.displayName || '',
-      createdAt: now,
-    });
-
-    await batch.commit();
-    return {};
-  } catch (error) {
-    return { error: friendlyError(error) };
-  }
-}
-
-export async function acceptWorkspaceInviteByToken(
-  token: string,
-  userId: string,
-  userEmail: string,
-): Promise<{ workspaceId?: string; error?: string }> {
-  try {
-    const invitesQ = query(
-      collection(db, WORKSPACE_INVITES_COL),
-      where('token', '==', token),
-      where('inviteeEmail', '==', userEmail.trim().toLowerCase()),
-      where('status', '==', 'pending')
-    );
-    const snap = await getDocs(invitesQ);
-    if (snap.empty) {
-      return { error: 'Invalid or expired invitation.' };
-    }
-    
-    const inviteDoc = snap.docs[0];
-    const inviteData = inviteDoc.data();
-    
-    // Check expiration
-    if (inviteData.expiresAt && new Date(inviteData.expiresAt) < new Date()) {
-      return { error: 'This invitation has expired.' };
-    }
-
-    // Reuse acceptInvite logic
-    const { error } = await acceptWorkspaceInvite(inviteDoc.id, inviteData.workspaceId, userId, inviteData.role);
-    if (error) return { error };
-
-    return { workspaceId: inviteData.workspaceId };
   } catch (error) {
     return { error: friendlyError(error) };
   }

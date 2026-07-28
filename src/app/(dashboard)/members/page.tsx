@@ -2,13 +2,12 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { GlassCard, EmptyState } from '@/components';
-import { Button, Input } from '@/components/ui';
+import { Input } from '@/components/ui';
 import { SearchIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
-import { fetchWorkspaceMembers, fetchWorkspaceInvites, cancelWorkspaceInvite } from '@/services/workspace';
+import { fetchWorkspaceMembers } from '@/services/workspace';
 import { updateMemberRole, removeMember } from '@/app/actions/members';
-import type { WorkspaceMember, WorkspaceRole, WorkspaceInvite } from '@/types';
-import WorkspaceInviteModal from '@/components/modals/WorkspaceInviteModal';
+import type { WorkspaceMember, WorkspaceRole } from '@/types';
 import { getInitials, formatRelativeDate } from '@/utils';
 import Image from 'next/image';
 import { isUserOnline } from '@/services/presence';
@@ -18,15 +17,13 @@ import MemberDrawer from './member-drawer';
 export default function MembersPage() {
   const { user } = useAuth();
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
-  const [invites, setInvites] = useState<WorkspaceInvite[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [searchQuery, setSearchQuery] = useState('');
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   const [selectedMember, setSelectedMember] = useState<WorkspaceMember | null>(null);
-  const [selectedInvite, setSelectedInvite] = useState<WorkspaceInvite | null>(null);
 
   const workspaceId = user?.uid; // User is the workspace owner by default
   const currentUserRole = members.find(m => m.userId === user?.uid)?.role || 'member';
@@ -40,16 +37,10 @@ export default function MembersPage() {
   async function loadMembers() {
     if (!workspaceId) return;
     setLoading(true);
-    const [{ members: fetchedMembers, error: membersErr }, { invites: fetchedInvites, error: invitesErr }] = await Promise.all([
-      fetchWorkspaceMembers(workspaceId),
-      fetchWorkspaceInvites(workspaceId)
-    ]);
+    const { members: fetchedMembers, error: membersErr } = await fetchWorkspaceMembers(workspaceId);
     
     if (membersErr) setError(membersErr);
     else if (fetchedMembers) setMembers(fetchedMembers);
-
-    if (invitesErr) console.error(invitesErr); // don't break page if invites fail
-    else if (fetchedInvites) setInvites(fetchedInvites);
 
     setLoading(false);
   }
@@ -92,17 +83,7 @@ export default function MembersPage() {
     }
   };
 
-  const handleCancelInvite = async (inviteId: string) => {
-    if (!workspaceId || !user) return;
-    if (!confirm('Cancel this invitation?')) return;
-    
-    setInvites(prev => prev.filter(i => i.id !== inviteId));
-    const { error: cancelErr } = await cancelWorkspaceInvite(inviteId, workspaceId, user.uid);
-    if (cancelErr) {
-      alert(cancelErr);
-      loadMembers(); // Revert
-    }
-  };
+
 
   const getRoleBadgeColor = (role: WorkspaceRole) => {
     switch (role) {
@@ -114,10 +95,7 @@ export default function MembersPage() {
     }
   };
 
-  const isInviteExpired = (invite: WorkspaceInvite) => {
-    if (!invite.expiresAt) return false;
-    return new Date(invite.expiresAt) < new Date();
-  };
+
 
   return (
     <div className="space-y-8">
@@ -129,14 +107,6 @@ export default function MembersPage() {
             Manage your workspace members and their roles.
           </p>
         </div>
-        {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
-          <Button
-            variant="primary"
-            onClick={() => setIsInviteOpen(true)}
-          >
-            Invite Member
-          </Button>
-        )}
       </div>
 
       {/* Search Bar */}
@@ -227,76 +197,14 @@ export default function MembersPage() {
         )}
       </div>
 
-      {/* Pending Invites Section */}
-      {(currentUserRole === 'owner' || currentUserRole === 'admin') && invites.length > 0 && (
-        <div className="space-y-4 pt-4">
-          <h2 className="text-lg font-semibold text-white">Pending Invitations</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {invites.map(invite => {
-              const expired = isInviteExpired(invite);
-              return (
-                <GlassCard 
-                  key={invite.id} 
-                  padding="lg"
-                  className="group relative cursor-pointer overflow-hidden transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-                  onClick={() => setSelectedInvite(invite)}
-                >
-                  <div className="flex flex-col gap-6">
-                    <div className="flex items-start justify-between">
-                      <div className="relative">
-                        <div className={`flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold shadow-inner ${expired ? 'bg-red-500/20 text-red-300' : 'bg-white/[0.04] text-white'}`}>
-                          {getInitials('', invite.inviteeEmail)}
-                        </div>
-                        {!expired && <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-[4px] border-[#0a0a0f] bg-white/50" title="Pending"><ClockIcon size={12} className="text-[#0a0a0f]" /></span>}
-                      </div>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${getRoleBadgeColor(invite.role)}`}>
-                        {invite.role}
-                      </span>
-                    </div>
-                    
-                    <div>
-                      <h3 className={`truncate text-lg font-bold tracking-tight ${expired ? 'text-red-300/80' : 'text-white'}`}>
-                        {invite.inviteeEmail}
-                      </h3>
-                      <p className={`mt-1 truncate text-sm ${expired ? 'text-red-400/60' : 'text-white/40'}`}>
-                        {expired ? 'Expired' : 'Pending Verification'}
-                      </p>
-                    </div>
 
-                    <div className="mt-2 flex flex-col gap-2 border-t border-white/[0.06] pt-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-white/40">Sent Date</span>
-                        <span className="font-medium text-white/70">{formatRelativeDate(invite.createdAt)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </GlassCard>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Modals */}
-      {isInviteOpen && workspaceId && (
-        <WorkspaceInviteModal
-          workspaceId={workspaceId}
-          inviterUid={user?.uid || ''}
-          onClose={() => {
-            setIsInviteOpen(false);
-            loadMembers();
-          }}
-        />
-      )}
 
       <MemberDrawer
-        isOpen={!!selectedMember || !!selectedInvite}
+        isOpen={!!selectedMember}
         onClose={() => {
           setSelectedMember(null);
-          setSelectedInvite(null);
         }}
         member={selectedMember}
-        invite={selectedInvite}
         currentUserRole={currentUserRole}
         currentUserId={user?.uid || ''}
         onRoleChange={(newRole) => {
@@ -307,15 +215,6 @@ export default function MembersPage() {
             handleRemove(selectedMember.id, selectedMember.userId);
             setSelectedMember(null);
           }
-        }}
-        onCancelInvite={() => {
-          if (selectedInvite) {
-            handleCancelInvite(selectedInvite.id);
-            setSelectedInvite(null);
-          }
-        }}
-        onResendInvite={() => {
-          alert('Invitation link copied to clipboard!');
         }}
       />
     </div>

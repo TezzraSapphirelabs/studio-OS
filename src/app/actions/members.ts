@@ -88,9 +88,9 @@ export async function updateMemberRole(
     await batch.commit();
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Server Action Error]', error);
-    return { error: error.message || 'Failed to update member role.' };
+    return { error: (error as Error).message || 'Failed to update member role.' };
   }
 }
 
@@ -164,8 +164,8 @@ export async function removeMember(
     await batch.commit();
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Server Action Error]', error);
-    return { error: error.message || 'Failed to remove member.' };
+    return { error: (error as Error).message || 'Failed to remove member.' };
   }
 }

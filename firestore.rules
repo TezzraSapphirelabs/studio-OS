@@ -141,18 +141,7 @@ service cloud.firestore {
       );
     }
 
-    match /projectInvites/{inviteId} {
-      allow read: if request.auth != null && (
-        request.auth.token.email == resource.data.inviteeEmail || isProjectMember(resource.data.projectId)
-      );
-      allow create: if request.auth != null && isRole(request.resource.data.projectId, ['owner', 'admin']);
-      allow update: if request.auth != null && (
-        request.auth.token.email == resource.data.inviteeEmail || isRole(resource.data.projectId, ['owner', 'admin'])
-      );
-      allow delete: if request.auth != null && (
-        request.auth.token.email == resource.data.inviteeEmail || isRole(resource.data.projectId, ['owner', 'admin'])
-      );
-    }
+
 
     // ── Phase 6 Extensions ─────────────────────────────────────
     
@@ -183,21 +172,7 @@ service cloud.firestore {
       );
     }
 
-    match /workspaceInvites/{inviteId} {
-      allow read: if request.auth != null && (
-        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) || 
-        request.auth.token.email == resource.data.inviteeEmail
-      );
-      allow create: if request.auth != null && isWorkspaceRole(request.resource.data.workspaceId, ['owner', 'admin']);
-      allow update: if request.auth != null && (
-        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) ||
-        request.auth.token.email == resource.data.inviteeEmail
-      );
-      allow delete: if request.auth != null && (
-        isWorkspaceRole(resource.data.workspaceId, ['owner', 'admin']) ||
-        request.auth.token.email == resource.data.inviteeEmail
-      );
-    }
+
 
     match /users/{userId}/notifications/{notificationId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;

@@ -16,7 +16,6 @@ import {
 } from '@/services/projects';
 import { getCompletionPercent, formatRelativeDate } from '@/utils';
 import type { Project, ProjectStatus } from '@/types';
-import InvitesList from './invites-list';
 
 // ── Color palette for new projects ─────────────────────────
 
@@ -316,7 +315,6 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      <InvitesList />
 
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

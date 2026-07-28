@@ -4,7 +4,6 @@ import { User, reauthenticateWithCredential, reauthenticateWithPopup, AuthProvid
 
 const PROJECTS_COL = 'projects';
 const MEMBERS_COL = 'members';
-const INVITES_COL = 'projectInvites';
 const ACTIVITIES_COL = 'activities';
 const USERS_COL = 'users';
 
@@ -32,7 +31,7 @@ export async function validateAccountDeletion(uid: string): Promise<{ error?: st
 export async function deleteUserAccountData(user: User): Promise<{ error?: string }> {
   try {
     const uid = user.uid;
-    const email = user.email || '';
+    
 
     let batch = writeBatch(db);
     let opCount = 0;
@@ -45,15 +44,6 @@ export async function deleteUserAccountData(user: User): Promise<{ error?: strin
       }
     };
 
-    if (email) {
-      const invitesQ = query(collection(db, INVITES_COL), where('inviteeEmail', '==', email.toLowerCase()));
-      const invitesSnap = await getDocs(invitesQ);
-      for (const d of invitesSnap.docs) {
-        batch.delete(d.ref);
-        opCount++;
-        await commitBatchIfNeeded();
-      }
-    }
 
     const membersQ = query(collection(db, MEMBERS_COL), where('userId', '==', uid));
     const membersSnap = await getDocs(membersQ);

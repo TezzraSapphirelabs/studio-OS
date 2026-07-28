@@ -86,7 +86,6 @@ export default function NotificationsPage() {
       case 'mention':
       case 'comment':
         return <MessageSquareIcon size={20} className="text-white/70" />;
-      case 'workspace_invite':
       case 'workspace_event':
         return <UsersIcon size={20} className="text-white/70" />;
       default:

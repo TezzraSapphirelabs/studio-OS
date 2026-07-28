@@ -57,20 +57,7 @@ export interface ProjectMember {
   joinedAt: string;
 }
 
-export type InviteStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'expired';
 
-export interface ProjectInvite {
-  id: string;
-  projectId: string;
-  inviterUid: string;
-  inviteeEmail: string;
-  role: ProjectRole;
-  status: InviteStatus;
-  token?: string;
-  expiresAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export type TaskStatus = 'todo' | 'in-progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
@@ -201,20 +188,9 @@ export interface WorkspaceMember {
   joinedAt: string;
 }
 
-export interface WorkspaceInvite {
-  id: string;
-  workspaceId: string;
-  inviterUid: string;
-  inviteeEmail: string;
-  role: WorkspaceRole;
-  status: InviteStatus;
-  token?: string;
-  expiresAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
-export type NotificationType = 'task_assigned' | 'mention' | 'invite_accepted' | 'project_update' | 'file_uploaded' | 'workspace_event';
+
+export type NotificationType = 'task_assigned' | 'mention' | 'project_update' | 'file_uploaded' | 'workspace_event';
 
 export interface Notification {
   id: string;

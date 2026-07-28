@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
-import { XIcon, ClockIcon, FolderIcon, CheckSquareIcon, ActivityIcon } from '@/components/icons';
-import { type WorkspaceMember, type WorkspaceInvite, type WorkspaceRole, type Project, type ProjectActivity } from '@/types';
+import { XIcon, FolderIcon, CheckSquareIcon, ActivityIcon } from '@/components/icons';
+import { type WorkspaceMember, type WorkspaceRole, type Project, type ProjectActivity } from '@/types';
 import { getInitials, formatRelativeDate } from '@/utils';
 import { subscribeToProjects } from '@/services/projects';
 import { useAllProjectsTasks } from '@/hooks/use-tasks';
@@ -17,13 +17,10 @@ interface MemberDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   member?: WorkspaceMember | null;
-  invite?: WorkspaceInvite | null;
   currentUserRole: WorkspaceRole;
   currentUserId: string;
   onRoleChange?: (newRole: WorkspaceRole) => void;
   onRemove?: () => void;
-  onCancelInvite?: () => void;
-  onResendInvite?: () => void; // Optional if we want to mock it
 }
 
 const ROLE_PERMISSIONS: Record<WorkspaceRole, string> = {
@@ -37,13 +34,10 @@ export default function MemberDrawer({
   isOpen,
   onClose,
   member,
-  invite,
   currentUserRole,
   currentUserId,
   onRoleChange,
-  onRemove,
-  onCancelInvite,
-  onResendInvite
+  onRemove
 }: MemberDrawerProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activities, setActivities] = useState<ProjectActivity[]>([]);
@@ -51,7 +45,7 @@ export default function MemberDrawer({
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   // We need the workspaceId. For now, assuming the member/invite has it.
-  const workspaceId = member?.workspaceId || invite?.workspaceId || '';
+  const workspaceId = member?.workspaceId || '';
   const targetUserId = member?.userId || '';
 
   const { tasks } = useAllProjectsTasks(workspaceId || 'mock', projects);
@@ -101,13 +95,12 @@ export default function MemberDrawer({
     return tasks.filter(t => t.assigneeId === targetUserId);
   }, [tasks, targetUserId]);
 
-  if (!isOpen && !member && !invite) return null;
+  if (!isOpen && !member) return null;
 
-  const isInvite = !!invite;
-  const role = member?.role || invite?.role || 'member';
-  const email = member?.email || invite?.inviteeEmail || '';
+  const role = member?.role || 'member';
+  const email = member?.email || '';
   const name = member?.displayName || email;
-  const joinedAt = member?.joinedAt || invite?.createdAt || new Date().toISOString();
+  const joinedAt = member?.joinedAt || new Date().toISOString();
   
   const canManage = currentUserRole === 'owner' || (currentUserRole === 'admin' && role !== 'owner');
   const canChangeRole = canManage && currentUserId !== targetUserId && role !== 'owner';
@@ -125,7 +118,7 @@ export default function MemberDrawer({
         className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-2xl flex-col border-l border-white/[0.06] bg-[#0a0a0f] shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
-          <h2 className="text-lg font-semibold text-white">{isInvite ? 'Pending Invitation' : 'Member Details'}</h2>
+          <h2 className="text-lg font-semibold text-white">Member Details</h2>
           <button onClick={onClose} className="rounded-lg p-2 text-white/40 hover:bg-white/[0.06] hover:text-white transition-colors">
             <XIcon size={20} />
           </button>
@@ -142,11 +135,7 @@ export default function MemberDrawer({
                   {getInitials(name, email)}
                 </div>
               )}
-              {isInvite && (
-                <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[#0a0a0f] bg-white/50" title="Pending">
-                  <ClockIcon size={12} className="text-white" />
-                </span>
-              )}
+
             </div>
             <h3 className="text-xl font-bold text-white">{name}</h3>
             <p className="text-sm text-white/40">{email}</p>
@@ -169,22 +158,6 @@ export default function MemberDrawer({
             <section>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">Info</h4>
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 space-y-3 text-sm">
-                {isInvite ? (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-white/40">Status</span>
-                      <span className="text-white/70 font-medium">Pending</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/40">Invited By</span>
-                      <span className="text-white">{invite.inviterUid}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-white/40">Sent Date</span>
-                      <span className="text-white">{formatRelativeDate(joinedAt)}</span>
-                    </div>
-                  </>
-                ) : (
                   <>
                     <div className="flex justify-between">
                       <span className="text-white/40">Joined Date</span>
@@ -195,12 +168,10 @@ export default function MemberDrawer({
                       <span className="text-white/70">Online now</span>
                     </div>
                   </>
-                )}
               </div>
             </section>
 
             {/* Stats (only for active members) */}
-            {!isInvite && (
               <section>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">Workspace Stats</h4>
                 <div className="grid grid-cols-2 gap-3">
@@ -226,10 +197,8 @@ export default function MemberDrawer({
                   </div>
                 </div>
               </section>
-            )}
 
             {/* Recent Activity */}
-            {!isInvite && (
               <section>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">Recent Activity</h4>
                 <div className="space-y-3">
@@ -252,55 +221,44 @@ export default function MemberDrawer({
                   )}
                 </div>
               </section>
-            )}
           </div>
         </div>
 
         {/* Actions Footer */}
         {canManage && (
           <div className="border-t border-white/[0.06] p-6 bg-white/[0.01]">
-            {isInvite ? (
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={onResendInvite}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-white text-black px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white text-black"
-                >
-                  Resend Invitation
-                </button>
-                <button 
-                  onClick={onCancelInvite}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/70 transition-all hover:bg-white/[0.08]"
-                >
-                  <XIcon size={16} />
-                  Cancel Invitation
-                </button>
-              </div>
-            ) : (
               <div className="flex flex-col gap-3">
                 {canChangeRole && (
-                  <div className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                    <span className="text-sm font-medium text-white/70">Change Role</span>
-                    <select 
-                      value={role}
-                      onChange={(e) => onRoleChange?.(e.target.value as WorkspaceRole)}
-                      className="h-8 rounded-lg border border-white/[0.06] bg-white/[0.05] px-2 text-sm text-white outline-none focus:border-white/20"
-                    >
-                      <option value="admin" className="bg-[#0f0f13]">Admin</option>
-                      <option value="member" className="bg-[#0f0f13]">Member</option>
-                      <option value="viewer" className="bg-[#0f0f13]">Viewer</option>
-                    </select>
+                  <div className="flex flex-col gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <span className="text-xs font-semibold text-white/40">Change Role</span>
+                    <div className="grid grid-cols-4 gap-2 mt-1">
+                      {(['admin', 'member', 'viewer'] as WorkspaceRole[]).map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => onRoleChange?.(r)}
+                          className={`rounded-lg py-2 text-xs font-semibold capitalize transition-all ${
+                            role === r 
+                              ? 'bg-white text-black' 
+                              : 'bg-white/[0.04] text-white hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          {r}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
-                {canManage && currentUserId !== targetUserId && role !== 'owner' && (
+                
+                {onRemove && (
                   <button 
                     onClick={onRemove}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/70 transition-all hover:bg-white/[0.08]"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-400 transition-all hover:bg-red-500/20"
                   >
-                    Remove Member
+                    <XIcon size={16} />
+                    {targetUserId === currentUserId ? 'Leave Workspace' : 'Remove from Workspace'}
                   </button>
                 )}
               </div>
-            )}
           </div>
         )}
       </div>
