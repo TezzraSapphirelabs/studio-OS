@@ -1,8 +1,8 @@
-# Studio OS
+# Velonos
 
 A modern, premium dark-themed project management operating system for creative teams. Built with **Next.js 15**, **TypeScript**, and **Tailwind CSS** featuring a stunning glassmorphism UI.
 
-![Studio OS](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
+![Velonos](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?style=flat-square&logo=tailwindcss)
 

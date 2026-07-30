@@ -48,7 +48,7 @@ export default function PendingPage() {
           
           <div className="space-y-4 text-sm text-white/60">
             <p>
-              Studio OS is a private internal platform. Your account has been created successfully, but requires approval from a Platform Owner before you can access the system.
+              Velonos is a private internal platform. Your account has been created successfully, but requires approval from a Platform Owner before you can access the system.
             </p>
             <p className="bg-amber-500/10 text-amber-400/90 py-2 px-4 rounded-lg inline-block border border-amber-500/20">
               Waiting for Platform Owner approval

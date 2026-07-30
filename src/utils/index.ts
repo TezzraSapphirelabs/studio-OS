@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Utility Functions
+// Velonos — Utility Functions
 // ============================================================
 
 import { type ClassValue, clsx } from 'clsx';

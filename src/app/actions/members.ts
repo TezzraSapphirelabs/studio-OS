@@ -169,3 +169,31 @@ export async function removeMember(
     return { error: (error as Error).message || 'Failed to remove member.' };
   }
 }
+
+export async function getPublicPlatformOwners() {
+  try {
+    const snap = await adminDb.collection('platformOwners').get();
+    const owners = await Promise.all(snap.docs.map(async (d) => {
+      const data = d.data();
+      const userSnap = await adminDb.collection('users').doc(data.userId).get();
+      if (userSnap.exists) {
+         const userData = userSnap.data();
+         return {
+           id: data.userId,
+           userId: data.userId,
+           email: userData?.email || '',
+           displayName: userData?.displayName || 'Platform Owner',
+           photoURL: userData?.photoURL || null,
+           role: 'Platform Owner',
+           joinedAt: data.createdAt || userData?.createdAt || new Date().toISOString(),
+           isPlatformOwner: true
+         };
+      }
+      return null;
+    }));
+    return { owners: owners.filter(Boolean) };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    return { error: 'Failed to fetch platform owners' };
+  }
+}

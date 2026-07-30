@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — User Utilities
+// Velonos — User Utilities
 // ============================================================
 
 import type { User } from 'firebase/auth';

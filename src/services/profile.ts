@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Profile Service (Firestore)
+// Velonos — Profile Service (Firestore)
 // ============================================================
 
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
@@ -8,7 +8,7 @@ import { type UserProfile } from '@/types';
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore error:', msg);
+  console.error('[Velonos] Firestore error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to perform this action.';
   }

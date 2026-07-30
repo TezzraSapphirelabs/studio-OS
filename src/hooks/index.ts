@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Custom Hooks
+// Velonos — Custom Hooks
 // ============================================================
 
 export { useMediaQuery } from './use-media-query';

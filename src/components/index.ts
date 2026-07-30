@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Component Barrel Exports
+// Velonos — Component Barrel Exports
 // ============================================================
 
 export { GlassCard } from './glass-card';

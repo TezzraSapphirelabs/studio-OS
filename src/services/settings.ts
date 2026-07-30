@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Settings Service (Firestore)
+// Velonos — Settings Service (Firestore)
 // ============================================================
 
 import { doc, getDoc, writeBatch } from 'firebase/firestore';
@@ -11,7 +11,7 @@ const WORKSPACES_COL = 'workspaces';
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore error:', msg);
+  console.error('[Velonos] Firestore error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to perform this action.';
   }
@@ -98,7 +98,7 @@ export async function deleteWorkspace(workspaceId: string, actorUid: string): Pr
   try {
     // Note: Actually deleting a workspace with all its subcollections and resources
     // requires a Firebase Extension or Cloud Function in a production environment.
-    // For Studio OS Phase 8, we will delete the workspace settings document,
+    // For Velonos Phase 8, we will delete the workspace settings document,
     // which signifies the workspace itself is deleted.
     
     // In a real application, you would:

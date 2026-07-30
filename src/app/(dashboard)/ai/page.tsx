@@ -363,8 +363,8 @@ export default function AIWorkspacePage() {
               <ZapIcon size={18} className="text-white/70" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white/90">Studio OS Assistant</h2>
-              <p className="text-xs text-white/40">Powered by Studio AI Engine</p>
+              <h2 className="text-lg font-semibold text-white/90">Velonos Assistant</h2>
+              <p className="text-xs text-white/40">Powered by Velonos AI Engine</p>
             </div>
           </div>
           <div className="lg:hidden">
@@ -460,7 +460,7 @@ export default function AIWorkspacePage() {
               value={input}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
-              placeholder={activeConversationId ? "Message Studio AI..." : "Create a conversation to start chatting"}
+              placeholder={activeConversationId ? "Message Velonos AI..." : "Create a conversation to start chatting"}
               disabled={loading || !activeConversationId}
               rows={1}
               className="w-full resize-none max-h-[200px] bg-transparent py-4 pl-5 pr-14 text-sm text-white placeholder-white/30 outline-none disabled:opacity-50 disabled:cursor-not-allowed"

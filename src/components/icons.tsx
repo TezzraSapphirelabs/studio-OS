@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — SVG Icon Components
+// Velonos — SVG Icon Components
 // ============================================================
 
 import React from 'react';

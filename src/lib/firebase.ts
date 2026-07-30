@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Firebase Configuration
+// Velonos — Firebase Configuration
 // ============================================================
 // Initialises the Firebase app as a singleton and exports the
 // auth instance. All credentials are read from environment

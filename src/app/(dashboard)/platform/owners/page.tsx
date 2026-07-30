@@ -125,7 +125,7 @@ export default function PlatformOwnersPage() {
               <div>
                 <h4 className="text-sm font-medium text-amber-400">Maximum Owners Reached</h4>
                 <p className="text-xs text-amber-400/70 mt-1">
-                  Studio OS supports a maximum of 2 Platform Owners for security. To add someone else, you must remove a current owner first.
+                  Velonos supports a maximum of 2 Platform Owners for security. To add someone else, you must remove a current owner first.
                 </p>
               </div>
             </div>

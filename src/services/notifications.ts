@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Notifications Service (Firestore)
+// Velonos — Notifications Service (Firestore)
 // ============================================================
 
 import {
@@ -16,7 +16,7 @@ import { type Notification, type NotificationType } from '@/types';
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore notifications error:', msg);
+  console.error('[Velonos] Firestore notifications error:', msg);
   return `Something went wrong: ${msg}`;
 }
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Comments Service (Firestore)
+// Velonos — Comments Service (Firestore)
 // ============================================================
 
 import {
@@ -19,7 +19,7 @@ const COMMENTS_COL = 'comments';
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore comments error:', msg);
+  console.error('[Velonos] Firestore comments error:', msg);
   return `Something went wrong: ${msg}`;
 }
 

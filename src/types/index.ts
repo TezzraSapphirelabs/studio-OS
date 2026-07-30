@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Core Type Definitions
+// Velonos — Core Type Definitions
 // ============================================================
 
 export type UserRole = 'Owner' | 'Admin' | 'Developer' | 'Project Manager' | 'Designer' | 'Member' | 'Viewer';

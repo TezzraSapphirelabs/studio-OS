@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Presence Service (Firestore)
+// Velonos — Presence Service (Firestore)
 // ============================================================
 
 import { doc, updateDoc } from 'firebase/firestore';
@@ -26,7 +26,7 @@ async function updatePresence(userId: string) {
     });
   } catch (error) {
     // Silently fail for presence to avoid console spam
-    console.debug('[Studio OS] Failed to update presence:', error);
+    console.debug('[Velonos] Failed to update presence:', error);
   }
 }
 

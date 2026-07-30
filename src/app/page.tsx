@@ -30,7 +30,7 @@ export default function WelcomePage() {
       <nav className="absolute top-0 w-full z-50 px-6 py-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
-          <span className="text-[12px] font-semibold tracking-widest uppercase text-white/80">Studio OS</span>
+          <span className="text-[12px] font-semibold tracking-widest uppercase text-white/80">Velonos</span>
         </div>
         <div className="flex items-center gap-6">
           <Link href="/login" className="text-[13px] font-medium text-white/60 hover:text-white transition-colors">
@@ -63,7 +63,7 @@ export default function WelcomePage() {
             </motion.div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter text-white">
-              <BlurText text="Studio OS" delay={0.2} animateBy="letters" />
+              <BlurText text="Velonos" delay={0.2} animateBy="letters" />
             </h1>
             
             <motion.p variants={FADE_UP} className="text-lg md:text-xl text-white/50 font-medium max-w-2xl mx-auto leading-relaxed">
@@ -94,7 +94,7 @@ export default function WelcomePage() {
           </motion.div>
         </section>
 
-        {/* Why Studio OS Section */}
+        {/* Why Velonos Section */}
         <section className="min-h-screen w-full flex flex-col items-center justify-center px-4 py-32 snap-center">
           <motion.div 
             initial="hidden"
@@ -105,7 +105,7 @@ export default function WelcomePage() {
           >
             <motion.div variants={FADE_UP} className="text-center mb-24">
               <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white mb-6">
-                <BlurText text="Why Studio OS?" delay={0.1} />
+                <BlurText text="Why Velonos?" delay={0.1} />
               </h2>
               <p className="text-white/50 text-lg max-w-2xl mx-auto">
                 Built for those who demand excellence. We stripped away the noise to give you a pure, uninterrupted environment for your best work.
@@ -234,7 +234,7 @@ export default function WelcomePage() {
         {/* Minimal Footer */}
         <footer className="w-full py-8 border-t border-white/[0.05] text-center snap-end">
           <p className="text-[11px] font-mono text-white/30 uppercase tracking-[0.2em]">
-            © {new Date().getFullYear()} Studio OS. All rights reserved.
+            © {new Date().getFullYear()} Velonos. All rights reserved.
           </p>
         </footer>
 

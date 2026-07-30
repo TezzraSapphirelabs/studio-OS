@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Activity Service (Firestore)
+// Velonos — Activity Service (Firestore)
 // ============================================================
 
 import {
@@ -116,7 +116,7 @@ export function subscribeToProjectActivity(
       onUpdate(activities, null);
     },
     (error) => {
-      console.error('[Studio OS] Activity subscribe error:', error);
+      console.error('[Velonos] Activity subscribe error:', error);
       onUpdate([], 'Failed to load activity feed.');
     }
   );

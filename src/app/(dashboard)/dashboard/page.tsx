@@ -192,7 +192,7 @@ export default function DashboardPage() {
                 <Sparkles className="w-4 h-4" />
                 <span className="text-xs uppercase tracking-widest font-mono">Intelligence</span>
               </div>
-              <h2 className="text-2xl font-light text-white">Ask Studio AI</h2>
+              <h2 className="text-2xl font-light text-white">Ask Velonos AI</h2>
               <p className="text-white/50 text-sm leading-relaxed">
                 Analyze project progress, generate reports, or ask for insights across your workspace.
               </p>

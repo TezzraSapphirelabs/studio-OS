@@ -1,7 +1,7 @@
 'use client';
 
 // ============================================================
-// Studio OS — Auth Context
+// Velonos — Auth Context
 // ============================================================
 // Provides the current Firebase user, loading state, and auth
 // helpers to the entire component tree via React Context.

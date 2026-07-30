@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Stats Card Component
+// Velonos — Stats Card Component
 // ============================================================
 
 import React from 'react';

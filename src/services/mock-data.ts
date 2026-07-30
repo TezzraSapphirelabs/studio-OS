@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Mock Data for Development
+// Velonos — Mock Data for Development
 // ============================================================
 
 import type { Project, Task, DashboardStats } from '@/types';

@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Firebase Auth Service
+// Velonos — Firebase Auth Service
 // ============================================================
 // Thin wrappers around Firebase Auth methods.
 // Maps Firebase error codes → user-friendly messages.

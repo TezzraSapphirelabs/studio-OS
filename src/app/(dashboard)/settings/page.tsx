@@ -257,7 +257,7 @@ export default function SettingsPage() {
             <GlassCard padding="lg">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-white">Appearance</h2>
-                <p className="mt-1 text-sm text-white/40">Customize how Studio OS looks for you.</p>
+                <p className="mt-1 text-sm text-white/40">Customize how Velonos looks for you.</p>
               </div>
               <div className="space-y-5">
                 <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">

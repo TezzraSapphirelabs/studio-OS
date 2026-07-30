@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Members Service (Firestore)
+// Velonos — Members Service (Firestore)
 // ============================================================
 
 import {
@@ -37,7 +37,7 @@ function docToProjectMember(id: string, data: DocumentData): ProjectMember {
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore members error:', msg);
+  console.error('[Velonos] Firestore members error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to manage members for this project.';
   }

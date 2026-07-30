@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Projects Service (Firestore)
+// Velonos — Projects Service (Firestore)
 // ============================================================
 // CRUD operations for user-scoped projects in Firestore.
 // Every project is owned by the authenticated user's UID.
@@ -42,7 +42,7 @@ function docToProject(id: string, data: DocumentData): Project {
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
   // Always log the real error for debugging
-  console.error('[Studio OS] Firestore error:', msg);
+  console.error('[Velonos] Firestore error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to perform this action.';
   }

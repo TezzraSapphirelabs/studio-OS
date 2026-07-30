@@ -45,7 +45,7 @@ export function subscribeToTags(
       onUpdate(tags, null);
     },
     (error) => {
-      console.error('[Studio OS] Subscribe tags error:', error);
+      console.error('[Velonos] Subscribe tags error:', error);
       onUpdate([], 'Failed to load tags.');
     }
   );

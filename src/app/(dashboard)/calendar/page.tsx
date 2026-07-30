@@ -73,7 +73,7 @@ export default function CalendarPage() {
         if (!event.isAllDay && event.date === todayStr && event.startTime === timeStr && event.status !== 'completed' && !event.archived) {
           const eventKey = `${event.id}-${todayStr}-${timeStr}`;
           if (!notifiedEvents.has(eventKey)) {
-            new Notification('Studio OS', {
+            new Notification('Velonos', {
               body: `Event "${event.title}" is starting now.`,
             });
             notifiedEvents.add(eventKey);

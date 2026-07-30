@@ -91,7 +91,7 @@ export const Sidebar = ({
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
             <span className="text-[13px] font-semibold tracking-widest uppercase text-white/90">
-              Studio OS
+              Velonos
             </span>
           </div>
         </div>

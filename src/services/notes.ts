@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Notes Service (Firestore)
+// Velonos — Notes Service (Firestore)
 // ============================================================
 
 import {
@@ -33,7 +33,7 @@ function docToNote(id: string, data: DocumentData): Note {
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore error:', msg);
+  console.error('[Velonos] Firestore error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to perform this action.';
   }

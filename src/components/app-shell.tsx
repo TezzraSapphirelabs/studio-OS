@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — App Shell (Layout wrapper with sidebar + top bar)
+// Velonos — App Shell (Layout wrapper with sidebar + top bar)
 // ============================================================
 
 'use client';

@@ -1,5 +1,5 @@
 // ============================================================
-// Studio OS — Workspace Service (Firestore)
+// Velonos — Workspace Service (Firestore)
 // ============================================================
 
 import {
@@ -22,7 +22,7 @@ const WORKSPACE_MEMBERS_COL = 'workspaceMembers';
 
 function friendlyError(error: unknown): string {
   const msg = error instanceof Error ? error.message : String(error);
-  console.error('[Studio OS] Firestore workspace error:', msg);
+  console.error('[Velonos] Firestore workspace error:', msg);
   if (msg.includes('permission') || msg.includes('PERMISSION_DENIED')) {
     return 'You do not have permission to perform this action.';
   }
