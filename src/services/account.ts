@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, writeBatch, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { User, reauthenticateWithCredential, reauthenticateWithPopup, AuthProvider, AuthCredential } from 'firebase/auth';
 
@@ -19,6 +19,13 @@ export async function validateAccountDeletion(uid: string): Promise<{ error?: st
       return {
         error: `You cannot delete your account because you are the owner of ${snap.size} project(s). Please delete them or transfer ownership to another member before deleting your account.`
       };
+    }
+
+    // Validate platform owner limits via a secure server action
+    const { verifyPlatformOwnerDeletion } = await import('@/app/actions/platform-keys');
+    const { error: ownerError } = await verifyPlatformOwnerDeletion(uid);
+    if (ownerError) {
+      return { error: ownerError };
     }
 
     return {};
@@ -57,10 +64,13 @@ export async function deleteUserAccountData(user: User): Promise<{ error?: strin
 
       if (projectId) {
         const projectRef = doc(db, PROJECTS_COL, projectId);
-        batch.update(projectRef, {
-          memberUids: arrayRemove(uid)
-        });
-        opCount++;
+        const projectSnap = await getDoc(projectRef);
+        if (projectSnap.exists()) {
+          batch.update(projectRef, {
+            memberUids: arrayRemove(uid)
+          });
+          opCount++;
+        }
       }
       await commitBatchIfNeeded();
     }
@@ -75,6 +85,10 @@ export async function deleteUserAccountData(user: User): Promise<{ error?: strin
 
     const profileRef = doc(db, USERS_COL, uid);
     batch.delete(profileRef);
+    opCount++;
+
+    const platformOwnerRef = doc(db, 'platformOwners', uid);
+    batch.delete(platformOwnerRef);
     opCount++;
 
     if (opCount > 0) {

@@ -15,6 +15,8 @@ export interface UserProfile {
   displayName: string;
   role: UserRole;
   photoURL: string | null;
+  status?: 'pending' | 'approved' | 'rejected';
+  requestMessage?: string;
   bio?: string;
   themePreference?: 'dark' | 'light' | 'system';
   notificationPreferences?: {

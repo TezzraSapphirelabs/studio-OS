@@ -22,7 +22,7 @@ import {
   type LinkingData,
 } from '@/services/auth';
 import { syncUserProfile } from '@/services/db';
-import { collection, query, where, limit, getDocs, doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { type UserRole, type UserProfile } from '@/types';
 
 // ── Types ──────────────────────────────────────────────────
@@ -34,6 +34,8 @@ interface AuthContextValue {
   userRole: UserRole | null;
   /** True if the user is a Platform Owner. */
   isPlatformOwner: boolean;
+  /** True if the user is not a Platform Owner and their status is pending or missing. */
+  isPending: boolean;
   /** The full user profile from Firestore, or `null`. */
   userProfile: UserProfile | null;
   /** Any error encountered while fetching the user role (e.g., offline). */
@@ -113,10 +115,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', auth.currentUser.uid));
-      setIsPlatformOwner(platformOwnerSnap.exists());
+      const isOwner = platformOwnerSnap.exists();
+      setIsPlatformOwner(isOwner);
       
-      const membersSnap = await getDocs(query(collection(db, 'workspaceMembers'), where('userId', '==', auth.currentUser.uid), limit(1)));
-      setHasWorkspace(!membersSnap.empty);
+      // Do NOT query workspaceMembers here. Normal users are not authorized to query it by userId 
+      // without triggering a Firestore static rules analysis failure, and hasWorkspace is unused.
+      setHasWorkspace(isOwner);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Failed to sync user profile", error);
@@ -154,10 +158,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
           const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', firebaseUser.uid));
-          setIsPlatformOwner(platformOwnerSnap.exists());
+          const isOwner = platformOwnerSnap.exists();
+          setIsPlatformOwner(isOwner);
           
-          const membersSnap = await getDocs(query(collection(db, 'workspaceMembers'), where('userId', '==', firebaseUser.uid), limit(1)));
-          setHasWorkspace(!membersSnap.empty);
+          setHasWorkspace(isOwner);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           console.error("Failed to sync user profile", error);
@@ -282,6 +286,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     userRole,
     isPlatformOwner,
+    isPending: !isPlatformOwner && (userProfile?.status === 'pending' || !userProfile?.status),
     userProfile,
     roleError,
     roleLoading,

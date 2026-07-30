@@ -20,6 +20,9 @@ export interface PlatformKeyData {
 export interface PlatformOwnerData {
   userId: string;
   addedAt: string;
+  displayName?: string;
+  email?: string;
+  status?: string;
 }
 
 function hashKey(plaintextKey: string): string {
@@ -163,6 +166,13 @@ export async function validatePlatformKey(plaintextKey: string, userId: string) 
           timestamp: new Date().toISOString()
       });
 
+      // Update the user's status so they are removed from the Pending Access Requests list
+      const userProfileRef = adminDb.collection('users').doc(userId);
+      t.update(userProfileRef, {
+        status: 'approved',
+        updatedAt: new Date().toISOString()
+      });
+
       return true;
     });
 
@@ -230,7 +240,17 @@ export async function getPlatformOwners(actorUid: string) {
     }
 
     const snap = await adminDb.collection(PLATFORM_OWNERS_COL).get();
-    const owners = snap.docs.map(doc => doc.data() as PlatformOwnerData);
+    const owners = await Promise.all(snap.docs.map(async (doc) => {
+      const data = doc.data() as PlatformOwnerData;
+      const userSnap = await adminDb.collection('users').doc(data.userId).get();
+      if (userSnap.exists) {
+        const userData = userSnap.data();
+        data.displayName = userData?.displayName;
+        data.email = userData?.email;
+      }
+      data.status = 'Active';
+      return data;
+    }));
     return { owners };
   } catch (error: unknown) {
     console.error('[getPlatformOwners]', error);
@@ -262,5 +282,21 @@ export async function removePlatformOwner(actorUid: string, targetUid: string) {
   } catch (error: unknown) {
     console.error('[removePlatformOwner]', error);
     return { error: 'Failed to remove owner.' };
+  }
+}
+
+export async function verifyPlatformOwnerDeletion(uid: string) {
+  try {
+    const ownerSnap = await adminDb.collection(PLATFORM_OWNERS_COL).doc(uid).get();
+    if (ownerSnap.exists) {
+      const allOwners = await adminDb.collection(PLATFORM_OWNERS_COL).get();
+      if (allOwners.size <= 1) {
+        return { error: 'You are the last Platform Owner. Add another Platform Owner before deleting this account.' };
+      }
+    }
+    return { success: true };
+  } catch (error: unknown) {
+    console.error('[verifyPlatformOwnerDeletion]', error);
+    return { error: 'Failed to verify platform owner deletion.' };
   }
 }

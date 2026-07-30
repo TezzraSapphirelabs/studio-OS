@@ -81,16 +81,26 @@ export default function PlatformOwnersPage() {
                   <Shield className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm text-white/90">{owner.userId}</span>
-                    {user?.uid === owner.userId && (
-                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">
-                        You
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-sm text-white/90">
+                        {owner.displayName || 'Unknown User'}
                       </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-white/40 mt-1">
-                    Added: {new Date(owner.addedAt).toLocaleString()}
+                      {user?.uid === owner.userId && (
+                        <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300">
+                          You
+                        </span>
+                      )}
+                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-500/20 text-green-300 ml-2">
+                        {owner.status || 'Active'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-white/60 mt-0.5">
+                      {owner.email || owner.userId}
+                    </div>
+                    <div className="text-xs text-white/40 mt-1">
+                      Added: {new Date(owner.addedAt).toLocaleString()}
+                    </div>
                   </div>
                 </div>
               </div>

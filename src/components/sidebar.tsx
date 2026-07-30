@@ -4,7 +4,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -19,7 +19,8 @@ import {
   Tag,
   Sparkles, 
   FileBox, 
-  Users, 
+  Users,
+  UserPlus,
   Bell, 
   Settings,
   LogOut,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { getDisplayName, getInitials } from '@/utils';
+import { RequestPlatformAccessDialog } from './request-platform-access-dialog';
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -51,6 +53,7 @@ const BOTTOM_ITEMS = [
 
 const PLATFORM_ITEMS = [
   { label: "Dashboard", href: "/platform/dashboard", icon: Globe },
+  { label: "Access Requests", href: "/platform/requests", icon: UserPlus },
   { label: "Access Keys", href: "/platform/access-keys", icon: Key },
   { label: "Owners", href: "/platform/owners", icon: Shield },
   { label: "Workspaces", href: "/platform/workspaces", icon: LayoutDashboard },
@@ -66,6 +69,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, userProfile, logout, isPlatformOwner } = useAuth();
+  const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
 
   const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -127,7 +131,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <NavItem key={item.href} item={item} />
           ))}
           
-          {isPlatformOwner && (
+          {isPlatformOwner ? (
             <div className="mt-8">
               <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-indigo-400/70 px-3 pt-6 pb-2 border-t border-white/[0.08]">
                 Platform Admin
@@ -135,6 +139,16 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               {PLATFORM_ITEMS.map((item) => (
                 <NavItem key={item.href} item={item} />
               ))}
+            </div>
+          ) : (
+            <div className="mt-8 px-3 pt-6 border-t border-white/[0.08]">
+              <button
+                onClick={() => setIsAccessDialogOpen(true)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative text-white/50 hover:text-white hover:bg-white/[0.04]"
+              >
+                <Shield className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
+                <span className="text-sm">Request Platform Access</span>
+              </button>
             </div>
           )}
         </div>
@@ -182,6 +196,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
       </aside>
+
+      <RequestPlatformAccessDialog 
+        isOpen={isAccessDialogOpen}
+        onClose={() => setIsAccessDialogOpen(false)}
+      />
     </>
   );
 }

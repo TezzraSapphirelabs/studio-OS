@@ -1,4 +1,4 @@
-import { doc, getDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { type UserProfile, type UserRole } from '@/types';
@@ -21,8 +21,21 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
   const isFirstUser = await bootstrapPlatformOwner(user.uid);
 
   if (userSnap.exists()) {
-    // Document exists, return the profile
-    return userSnap.data() as UserProfile;
+    const profile = userSnap.data() as UserProfile;
+    
+    // Migration: If the user doesn't have a status, assign one based on their Platform Owner status
+    if (!profile.status) {
+      const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', user.uid));
+      const isOwner = platformOwnerSnap.exists();
+      
+      profile.status = isOwner ? 'approved' : 'pending';
+      await updateDoc(userRef, { 
+        status: profile.status,
+        updatedAt: new Date().toISOString()
+      });
+    }
+    
+    return profile;
   }
 
   const now = new Date().toISOString();
@@ -34,6 +47,7 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     displayName: user.displayName || user.email?.split('@')[0] || 'Unknown User',
     photoURL: user.photoURL || null,
     role: 'Member' as UserRole,
+    ...(!isFirstUser && { status: 'pending' }),
     createdAt: now,
     updatedAt: now,
   };
