@@ -1,7 +1,7 @@
 'use server';
 
 import { adminDb } from '@/lib/firebase-admin';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const PLATFORM_KEYS_COL = 'platformAccessKeys';
 const PLATFORM_OWNERS_COL = 'platformOwners';

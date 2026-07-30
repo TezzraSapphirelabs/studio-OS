@@ -1,8 +1,8 @@
 import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 function getFirebaseCredentials() {
   const keyPath = path.join(process.cwd(), 'firebase-admin-key.json');
