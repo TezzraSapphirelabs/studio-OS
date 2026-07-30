@@ -10,21 +10,21 @@ import { Button } from '@/components/ui/button';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 
 export default function PendingPage() {
-  const { user, isPending, logout, loading, isPlatformOwner } = useAuth();
+  const { user, isPending, logout, loading, roleLoading, isPlatformOwner } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !roleLoading && !user) {
       router.replace('/login');
-    } else if (!loading && !isPending && !isPlatformOwner && user) {
+    } else if (!loading && !roleLoading && !isPending && !isPlatformOwner && user) {
       // If they somehow got approved, redirect to dashboard
       router.replace('/dashboard');
-    } else if (!loading && isPlatformOwner && user) {
+    } else if (!loading && !roleLoading && isPlatformOwner && user) {
       router.replace('/platform/dashboard');
     }
-  }, [loading, user, isPending, isPlatformOwner, router]);
+  }, [loading, roleLoading, user, isPending, isPlatformOwner, router]);
 
-  if (loading || !user) {
+  if (loading || roleLoading || !user) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
