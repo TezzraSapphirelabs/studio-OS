@@ -13,6 +13,14 @@ export default function PendingPage() {
   const { user, isPending, logout, loading, roleLoading, isPlatformOwner } = useAuth();
   const router = useRouter();
 
+  console.log('[PendingPage Render]', {
+    uid: user?.uid,
+    loading,
+    roleLoading,
+    isPending,
+    isPlatformOwner
+  });
+
   React.useEffect(() => {
     if (!loading && !roleLoading && !user) {
       router.replace('/login');

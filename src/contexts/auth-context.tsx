@@ -137,7 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRoleLoading(true);
         setRoleError(null);
         try {
+          console.log('[AuthContext] syncUserProfile starting for uid:', firebaseUser.uid);
           const profile = await syncUserProfile(firebaseUser);
+          console.log('[AuthContext] syncUserProfile returned:', profile);
           setUserRole(profile.role);
           setUserProfile(profile);
           
@@ -157,13 +159,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               }
             }
           }
+          const docPath = `platformOwners/${firebaseUser.uid}`;
+          console.log('[AuthContext] Fetching platformOwner doc from path:', docPath);
           const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', firebaseUser.uid));
           const isOwner = platformOwnerSnap.exists();
+          console.log('[AuthContext] platformOwner doc exists():', isOwner);
           setIsPlatformOwner(isOwner);
           
           setHasWorkspace(isOwner);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
+          console.error("[AuthContext] Failed to sync user profile or fetch owner:", error);
           console.error("Failed to sync user profile", error);
           setRoleError(error.message || 'Failed to sync user profile');
         } finally {
@@ -282,11 +288,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [linkingData]);
 
+  const isPendingCalc = !isPlatformOwner && (userProfile?.status === 'pending' || !userProfile?.status);
+
+  console.log('[AuthContext Render]', {
+    uid: user?.uid,
+    isPlatformOwner,
+    userProfileStatus: userProfile?.status,
+    isPending: isPendingCalc,
+    loading,
+    roleLoading
+  });
+
   const value = {
     user,
     userRole,
     isPlatformOwner,
-    isPending: !isPlatformOwner && (userProfile?.status === 'pending' || !userProfile?.status),
+    isPending: isPendingCalc,
     userProfile,
     roleError,
     roleLoading,

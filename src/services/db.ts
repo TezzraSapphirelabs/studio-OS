@@ -12,23 +12,32 @@ import { bootstrapPlatformOwner } from '@/app/actions/platform-keys';
  * @returns The user's profile from Firestore.
  */
 export async function syncUserProfile(user: User): Promise<UserProfile> {
+  console.log('[syncUserProfile] Starting for uid:', user.uid);
   if (!user) throw new Error('No authenticated user provided.');
 
   const userRef = doc(db, 'users', user.uid);
   const userSnap = await getDoc(userRef);
+  console.log('[syncUserProfile] Fetched userSnap. exists():', userSnap.exists());
 
   // Safely attempt to bootstrap if this is the very first user on the platform.
+  console.log('[syncUserProfile] Calling bootstrapPlatformOwner');
   const isFirstUser = await bootstrapPlatformOwner(user.uid);
+  console.log('[syncUserProfile] bootstrapPlatformOwner returned:', isFirstUser);
 
   if (userSnap.exists()) {
     const profile = userSnap.data() as UserProfile;
+    console.log('[syncUserProfile] Existing profile status:', profile.status);
     
     // Migration: If the user doesn't have a status, assign one based on their Platform Owner status
     if (!profile.status) {
+      const docPath = `platformOwners/${user.uid}`;
+      console.log('[syncUserProfile] Fetching platformOwner doc for migration from:', docPath);
       const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', user.uid));
       const isOwner = platformOwnerSnap.exists();
+      console.log('[syncUserProfile] platformOwner doc exists():', isOwner);
       
       profile.status = isOwner ? 'approved' : 'pending';
+      console.log('[syncUserProfile] Setting profile.status to:', profile.status);
       await updateDoc(userRef, { 
         status: profile.status,
         updatedAt: new Date().toISOString()
