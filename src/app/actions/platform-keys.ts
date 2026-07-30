@@ -260,28 +260,52 @@ export async function getPlatformOwners(actorUid: string) {
 
 export async function removePlatformOwner(actorUid: string, targetUid: string) {
   try {
-    const actorSnap = await adminDb.collection(PLATFORM_OWNERS_COL).doc(actorUid).get();
-    if (!actorSnap.exists) {
-      return { error: 'Unauthorized.' };
-    }
-    
     if (actorUid === targetUid) {
       return { error: 'You cannot remove yourself.' };
     }
 
-    await adminDb.collection(PLATFORM_OWNERS_COL).doc(targetUid).delete();
-    
-    await adminDb.collection(PLATFORM_AUDIT_COL).add({
-      action: 'REMOVE_OWNER',
-      actorUid,
-      targetUid,
-      timestamp: new Date().toISOString(),
+    const actorRef = adminDb.collection(PLATFORM_OWNERS_COL).doc(actorUid);
+    const targetRef = adminDb.collection(PLATFORM_OWNERS_COL).doc(targetUid);
+    const targetUserRef = adminDb.collection('users').doc(targetUid);
+    const auditRef = adminDb.collection(PLATFORM_AUDIT_COL).doc();
+
+    await adminDb.runTransaction(async (t) => {
+      const actorSnap = await t.get(actorRef);
+      if (!actorSnap.exists) {
+        throw new Error('Unauthorized.');
+      }
+      
+      const targetSnap = await t.get(targetRef);
+      if (!targetSnap.exists) {
+        throw new Error('Target is not a Platform Owner.');
+      }
+
+      const targetUserSnap = await t.get(targetUserRef);
+
+      // 1. Remove from Platform Owners
+      t.delete(targetRef);
+      
+      // 2. Demote user profile status back to pending
+      if (targetUserSnap.exists) {
+        t.update(targetUserRef, {
+          status: 'pending',
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      // 3. Create Audit Log
+      t.set(auditRef, {
+        action: 'REMOVE_OWNER',
+        actorUid,
+        targetUid,
+        timestamp: new Date().toISOString(),
+      });
     });
 
     return { success: true };
   } catch (error: unknown) {
     console.error('[removePlatformOwner]', error);
-    return { error: 'Failed to remove owner.' };
+    return { error: (error as Error).message || 'Failed to remove owner.' };
   }
 }
 
