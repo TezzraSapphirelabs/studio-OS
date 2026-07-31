@@ -19,7 +19,7 @@ export async function getPendingUsers(actorUid: string): Promise<{ users?: UserP
 
     const snap = await adminDb.collection('users').where('status', '==', 'pending').get();
     const users = snap.docs.map(doc => doc.data() as UserProfile);
-    
+
     return { users };
   } catch (error: unknown) {
     console.error('Failed to fetch pending users:', error);

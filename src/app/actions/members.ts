@@ -17,11 +17,11 @@ export async function updateMemberRole(
     // 1. Verify actor is owner or admin
     const actorRef = adminDb.collection('workspaceMembers').doc(`${workspaceId}_${actorUid}`);
     const actorSnap = await actorRef.get();
-    
+
     if (!actorSnap.exists) {
       return { error: 'You are not a member of this workspace.' };
     }
-    
+
     const actorRole = actorSnap.data()?.role;
     if (actorRole !== 'owner' && actorRole !== 'admin') {
       return { error: 'Only owners and admins can manage roles.' };
@@ -38,7 +38,7 @@ export async function updateMemberRole(
     if (!targetSnap.exists) {
       return { error: 'Target member not found.' };
     }
-    
+
     const currentTargetRole = targetSnap.data()?.role;
 
     // Admins cannot demote an owner
@@ -106,7 +106,7 @@ export async function removeMember(
 
     // 1. Verify actor is owner or admin (or leaving themselves)
     const isLeaving = targetUserId === actorUid;
-    
+
     let actorRole = 'none';
     if (!isLeaving) {
       const actorRef = adminDb.collection('workspaceMembers').doc(`${workspaceId}_${actorUid}`);
@@ -126,7 +126,7 @@ export async function removeMember(
     if (!targetSnap.exists) {
       return { error: 'Target member not found.' };
     }
-    
+
     const targetRole = targetSnap.data()?.role;
 
     // Admins cannot remove an owner
@@ -177,17 +177,17 @@ export async function getPublicPlatformOwners() {
       const data = d.data();
       const userSnap = await adminDb.collection('users').doc(data.userId).get();
       if (userSnap.exists) {
-         const userData = userSnap.data();
-         return {
-           id: data.userId,
-           userId: data.userId,
-           email: userData?.email || '',
-           displayName: userData?.displayName || 'Platform Owner',
-           photoURL: userData?.photoURL || null,
-           role: 'Platform Owner',
-           joinedAt: data.createdAt || userData?.createdAt || new Date().toISOString(),
-           isPlatformOwner: true
-         };
+        const userData = userSnap.data();
+        return {
+          id: data.userId,
+          userId: data.userId,
+          email: userData?.email || '',
+          displayName: userData?.displayName || 'Platform Owner',
+          photoURL: userData?.photoURL || null,
+          role: 'Platform Owner',
+          joinedAt: data.createdAt || userData?.createdAt || new Date().toISOString(),
+          isPlatformOwner: true
+        };
       }
       return null;
     }));
