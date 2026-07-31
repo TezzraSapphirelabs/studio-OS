@@ -288,7 +288,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [linkingData]);
 
-  const isPendingCalc = !isPlatformOwner && (userProfile?.status === 'pending' || !userProfile?.status);
+  const isPendingCalc = !isPlatformOwner && userProfile?.status !== 'approved';
 
   console.log('[AuthContext Render]', {
     uid: user?.uid,

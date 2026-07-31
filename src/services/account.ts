@@ -21,12 +21,7 @@ export async function validateAccountDeletion(uid: string): Promise<{ error?: st
       };
     }
 
-    // Validate platform owner limits via a secure server action
-    const { verifyPlatformOwnerDeletion } = await import('@/app/actions/platform-keys');
-    const { error: ownerError } = await verifyPlatformOwnerDeletion(uid);
-    if (ownerError) {
-      return { error: ownerError };
-    }
+    // Validation of platform owner limits is removed because Platform Owners feature is deleted.
 
     return {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

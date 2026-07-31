@@ -192,8 +192,7 @@ export async function getPublicPlatformOwners() {
       return null;
     }));
     return { owners: owners.filter(Boolean) };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
+  } catch {
     return { error: 'Failed to fetch platform owners' };
   }
 }

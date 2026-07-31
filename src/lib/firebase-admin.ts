@@ -18,7 +18,7 @@ function getFirebaseCredentials() {
 
   if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
     return cert({
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     });
@@ -28,7 +28,7 @@ function getFirebaseCredentials() {
 }
 
 const credential = getFirebaseCredentials();
-console.log("PROJECT:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+console.log("PROJECT:", process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
 console.log("EMAIL:", Boolean(process.env.FIREBASE_CLIENT_EMAIL));
 console.log("KEY:", Boolean(process.env.FIREBASE_PRIVATE_KEY));
 if (!credential && getApps().length === 0) {
@@ -39,7 +39,7 @@ if (!credential && getApps().length === 0) {
 }
 
 const app = getApps().length === 0 ? initializeApp(credential ? { credential } : {
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  projectId: process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
 }) : getApp();
 
 export const adminDb = getFirestore(app);

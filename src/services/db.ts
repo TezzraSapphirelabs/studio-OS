@@ -2,7 +2,6 @@ import { doc, getDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { type UserProfile, type UserRole } from '@/types';
-import { bootstrapPlatformOwner } from '@/app/actions/platform-keys';
 
 /**
  * Synchronizes the Firebase Auth user with the Firestore users collection.
@@ -19,24 +18,16 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
   const userSnap = await getDoc(userRef);
   console.log('[syncUserProfile] Fetched userSnap. exists():', userSnap.exists());
 
-  // Safely attempt to bootstrap if this is the very first user on the platform.
-  console.log('[syncUserProfile] Calling bootstrapPlatformOwner');
-  const isFirstUser = await bootstrapPlatformOwner(user.uid);
-  console.log('[syncUserProfile] bootstrapPlatformOwner returned:', isFirstUser);
-
+  // No longer bootstrapping Platform Owners since the feature is removed.
+  // The first user will be pending, unless they are manually approved in the Firestore console.
+  
   if (userSnap.exists()) {
     const profile = userSnap.data() as UserProfile;
     console.log('[syncUserProfile] Existing profile status:', profile.status);
     
-    // Migration: If the user doesn't have a status, assign one based on their Platform Owner status
+    // Migration: If the user doesn't have a status, default to pending
     if (!profile.status) {
-      const docPath = `platformOwners/${user.uid}`;
-      console.log('[syncUserProfile] Fetching platformOwner doc for migration from:', docPath);
-      const platformOwnerSnap = await getDoc(doc(db, 'platformOwners', user.uid));
-      const isOwner = platformOwnerSnap.exists();
-      console.log('[syncUserProfile] platformOwner doc exists():', isOwner);
-      
-      profile.status = isOwner ? 'approved' : 'pending';
+      profile.status = 'pending';
       console.log('[syncUserProfile] Setting profile.status to:', profile.status);
       await updateDoc(userRef, { 
         status: profile.status,
@@ -56,29 +47,13 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     displayName: user.displayName || user.email?.split('@')[0] || 'Unknown User',
     photoURL: user.photoURL || null,
     role: 'Member' as UserRole,
-    status: isFirstUser ? 'approved' : 'pending',
+    status: 'pending',
     createdAt: now,
     updatedAt: now,
   };
 
-  
   const batch = writeBatch(db);
   batch.set(userRef, newProfile);
-
-  if (isFirstUser) {
-    // First user ever -> Also gets a personal workspace to start
-    const memberRef = doc(db, 'workspaceMembers', `${user.uid}_${user.uid}`);
-    batch.set(memberRef, {
-      workspaceId: user.uid,
-      userId: user.uid,
-      email: user.email || '',
-      displayName: newProfile.displayName,
-      photoURL: newProfile.photoURL,
-      role: 'owner',
-      joinedAt: now,
-    });
-  }
-
   await batch.commit();
 
   return newProfile;

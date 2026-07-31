@@ -4,12 +4,12 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { 
+import {
   LayoutDashboard, 
   FolderKanban, 
   CheckSquare, 
@@ -23,15 +23,10 @@ import {
   UserPlus,
   Bell, 
   Settings,
-  LogOut,
-  Shield,
-  Key,
-  Activity,
-  Globe
+  LogOut
 } from "lucide-react";
 import { useAuth } from '@/contexts/auth-context';
 import { getDisplayName, getInitials } from '@/utils';
-import { RequestPlatformAccessDialog } from './request-platform-access-dialog';
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -51,49 +46,40 @@ const BOTTOM_ITEMS = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-const PLATFORM_ITEMS = [
-  { label: "Dashboard", href: "/platform/dashboard", icon: Globe },
-  { label: "Access Requests", href: "/platform/requests", icon: UserPlus },
-  { label: "Access Keys", href: "/platform/access-keys", icon: Key },
-  { label: "Owners", href: "/platform/owners", icon: Shield },
-  { label: "Workspaces", href: "/platform/workspaces", icon: LayoutDashboard },
-  { label: "System Health", href: "/platform/health", icon: Activity },
-  { label: "Settings", href: "/platform/settings", icon: Settings },
-];
-
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+const NavItem = ({ item, pathname, onClose }: { item: typeof NAV_ITEMS[0]; pathname: string; onClose: () => void }) => {
+  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+  const Icon = item.icon;
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onClose}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative",
+        isActive 
+          ? "bg-white/[0.08] text-white font-medium shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" 
+          : "text-white/50 hover:text-white hover:bg-white/[0.04]"
+      )}
+    >
+      {isActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+      )}
+      <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-white/40 group-hover:text-white/70 transition-colors")} />
+      <span className="text-sm">{item.label}</span>
+    </Link>
+  );
+};
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, userProfile, logout, isPlatformOwner } = useAuth();
-  const [isAccessDialogOpen, setIsAccessDialogOpen] = useState(false);
 
-  const NavItem = ({ item }: { item: typeof NAV_ITEMS[0] }) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-    const Icon = item.icon;
 
-    return (
-      <Link
-        href={item.href}
-        onClick={onClose}
-        className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative",
-          isActive 
-            ? "bg-white/[0.08] text-white font-medium shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]" 
-            : "text-white/50 hover:text-white hover:bg-white/[0.04]"
-        )}
-      >
-        {isActive && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-        )}
-        <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-white/40 group-hover:text-white/70 transition-colors")} />
-        <span className="text-sm">{item.label}</span>
-      </Link>
-    );
-  };
 
   return (
     <>
@@ -128,35 +114,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             Workspace
           </div>
           {NAV_ITEMS.map((item) => (
-            <NavItem key={item.href} item={item} />
+            <NavItem key={item.href} item={item} pathname={pathname} onClose={onClose} />
           ))}
-          
-          {isPlatformOwner ? (
-            <div className="mt-8">
-              <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-indigo-400/70 px-3 pt-6 pb-2 border-t border-white/[0.08]">
-                Platform Admin
-              </div>
-              {PLATFORM_ITEMS.map((item) => (
-                <NavItem key={item.href} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-8 px-3 pt-6 border-t border-white/[0.08]">
-              <button
-                onClick={() => setIsAccessDialogOpen(true)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative text-white/50 hover:text-white hover:bg-white/[0.04]"
-              >
-                <Shield className="w-4 h-4 text-white/40 group-hover:text-white/70 transition-colors" />
-                <span className="text-sm">Request Platform Access</span>
-              </button>
-            </div>
+          {isPlatformOwner && (
+            <NavItem item={{ label: "Access Requests", href: "/platform/requests", icon: UserPlus }} pathname={pathname} onClose={onClose} />
           )}
         </div>
 
         {/* Bottom Nav */}
         <div className="px-4 border-t border-white/[0.08] space-y-1 pt-4 pb-2">
           {BOTTOM_ITEMS.map((item) => (
-            <NavItem key={item.href} item={item} />
+            <NavItem key={item.href} item={item} pathname={pathname} onClose={onClose} />
           ))}
         </div>
 
@@ -197,10 +165,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
       </aside>
 
-      <RequestPlatformAccessDialog 
-        isOpen={isAccessDialogOpen}
-        onClose={() => setIsAccessDialogOpen(false)}
-      />
     </>
   );
 }

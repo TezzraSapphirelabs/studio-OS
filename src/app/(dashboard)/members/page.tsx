@@ -14,6 +14,13 @@ import { isUserOnline } from '@/services/presence';
 
 import MemberDrawer from './member-drawer';
 
+const roleWeight: Record<string, number> = {
+  'owner': 1,
+  'admin': 2,
+  'member': 3,
+  'viewer': 4
+};
+
 type UIMember = WorkspaceMember & { isPlatformOwner?: boolean };
 
 export default function MembersPage() {
@@ -54,12 +61,7 @@ export default function MembersPage() {
     setLoading(false);
   }
 
-  const roleWeight: Record<string, number> = {
-    'owner': 1,
-    'admin': 2,
-    'member': 3,
-    'viewer': 4
-  };
+
 
   const filteredMembers = useMemo(() => {
     const q = searchQuery.toLowerCase();

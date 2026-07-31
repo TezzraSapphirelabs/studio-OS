@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -27,7 +27,7 @@ const STAGGER = {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, register, googleLogin, githubLogin, resolveLinking } = useAuth();
+  const { login, register, googleLogin, githubLogin, resolveLinking, user, loading: authLoading, roleLoading, isPending, isPlatformOwner, userProfile } = useAuth();
   
   const initialMode = searchParams.get('mode') === 'signup';
   const [isSignUp, setIsSignUp] = useState(initialMode);
@@ -45,6 +45,21 @@ function LoginContent() {
   const linkEmail = searchParams.get('email');
   const linkProvider = searchParams.get('provider');
   const isLinking = !!(linkToken && linkEmail && linkProvider);
+
+  useEffect(() => {
+    // Only redirect once both initial auth and role fetch are complete, and we have a user
+    if (!authLoading && !roleLoading && user && userProfile) {
+      if (isLinking) return; // Let the linking flow finish
+      
+      if (isPending) {
+        router.push('/pending');
+      } else if (isPlatformOwner) {
+        router.push('/platform/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  }, [authLoading, roleLoading, user, userProfile, isPending, isPlatformOwner, router, isLinking]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,12 +94,9 @@ function LoginContent() {
         const err = await register(email, password, name);
         if (err) {
           setError(err);
-        } else {
-          router.push('/dashboard');
         }
       } else {
         await login(email, password);
-        router.push('/dashboard');
       }
     } catch (err: unknown) {
       setError((err as Error).message || 'Failed to authenticate. Please check your credentials.');
@@ -100,7 +112,6 @@ function LoginContent() {
     setError(null);
     try {
       await googleLogin();
-      router.push('/dashboard');
     } catch (err: unknown) {
       setError((err as Error).message || 'Google sign-in failed.');
       setLoading(false);
@@ -112,7 +123,6 @@ function LoginContent() {
     setError(null);
     try {
       await githubLogin();
-      router.push('/dashboard');
     } catch (err: unknown) {
       setError((err as Error).message || 'GitHub sign-in failed.');
       setLoading(false);
