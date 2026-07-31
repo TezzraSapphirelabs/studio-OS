@@ -6,7 +6,7 @@ import path from 'node:path';
 
 function getFirebaseCredentials() {
   const keyPath = path.join(process.cwd(), 'firebase-admin-key.json');
-  
+
   if (fs.existsSync(keyPath)) {
     try {
       const keyJson = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
@@ -15,7 +15,7 @@ function getFirebaseCredentials() {
       console.warn('⚠️ Found firebase-admin-key.json but could not parse it.');
     }
   }
-  
+
   if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
     return cert({
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -23,12 +23,14 @@ function getFirebaseCredentials() {
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     });
   }
-  
+
   return null;
 }
 
 const credential = getFirebaseCredentials();
-
+console.log("PROJECT:", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+console.log("EMAIL:", Boolean(process.env.FIREBASE_CLIENT_EMAIL));
+console.log("KEY:", Boolean(process.env.FIREBASE_PRIVATE_KEY));
 if (!credential && getApps().length === 0) {
   console.error('\n❌ CRITICAL: Missing Firebase Admin credentials.');
   console.error('Please either:');
