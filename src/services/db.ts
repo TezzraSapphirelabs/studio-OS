@@ -56,7 +56,7 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     displayName: user.displayName || user.email?.split('@')[0] || 'Unknown User',
     photoURL: user.photoURL || null,
     role: 'Member' as UserRole,
-    ...(!isFirstUser && { status: 'pending' }),
+    status: isFirstUser ? 'approved' : 'pending',
     createdAt: now,
     updatedAt: now,
   };
