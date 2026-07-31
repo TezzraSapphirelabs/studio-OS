@@ -54,7 +54,7 @@ function LoginContent() {
       if (isPending) {
         router.push('/pending');
       } else if (isPlatformOwner) {
-        router.push('/platform/dashboard');
+        router.push('/platform/requests');
       } else {
         router.push('/dashboard');
       }

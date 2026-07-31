@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
       if (isPending) {
         router.replace('/pending');
       } else if (isPlatformOwner) {
-        router.replace('/platform/dashboard');
+        router.replace('/platform/requests');
       } else {
         router.replace('/dashboard');
       }

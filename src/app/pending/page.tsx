@@ -28,7 +28,7 @@ export default function PendingPage() {
       // If they somehow got approved, redirect to dashboard
       router.replace('/dashboard');
     } else if (!loading && !roleLoading && isPlatformOwner && user) {
-      router.replace('/platform/dashboard');
+      router.replace('/platform/requests');
     }
   }, [loading, roleLoading, user, isPending, isPlatformOwner, router]);
 
