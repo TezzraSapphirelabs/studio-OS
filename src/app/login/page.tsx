@@ -27,7 +27,7 @@ const STAGGER = {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, register, googleLogin, githubLogin, resolveLinking, user, loading: authLoading, roleLoading, isPending, isPlatformOwner, userProfile } = useAuth();
+  const { login, register, googleLogin, githubLogin, resolveLinking, user, loading: authLoading, roleLoading, isPlatformOwner, userProfile } = useAuth();
   
   const initialMode = searchParams.get('mode') === 'signup';
   const [isSignUp, setIsSignUp] = useState(initialMode);
@@ -51,15 +51,9 @@ function LoginContent() {
     if (!authLoading && !roleLoading && user && userProfile) {
       if (isLinking) return; // Let the linking flow finish
       
-      if (isPending) {
-        router.push('/pending');
-      } else if (isPlatformOwner) {
-        router.push('/platform/requests');
-      } else {
-        router.push('/dashboard');
-      }
+      router.push('/dashboard');
     }
-  }, [authLoading, roleLoading, user, userProfile, isPending, isPlatformOwner, router, isLinking]);
+  }, [authLoading, roleLoading, user, userProfile, isPlatformOwner, router, isLinking]);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -34,8 +34,7 @@ interface AuthContextValue {
   userRole: UserRole | null;
   /** True if the user is a Platform Owner. */
   isPlatformOwner: boolean;
-  /** True if the user is not a Platform Owner and their status is pending or missing. */
-  isPending: boolean;
+
   /** The full user profile from Firestore, or `null`. */
   userProfile: UserProfile | null;
   /** Any error encountered while fetching the user role (e.g., offline). */
@@ -288,13 +287,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [linkingData]);
 
-  const isPendingCalc = !isPlatformOwner && userProfile?.status !== 'approved';
-
   console.log('[AuthContext Render]', {
     uid: user?.uid,
     isPlatformOwner,
-    userProfileStatus: userProfile?.status,
-    isPending: isPendingCalc,
     loading,
     roleLoading
   });
@@ -303,7 +298,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     userRole,
     isPlatformOwner,
-    isPending: isPendingCalc,
+
     userProfile,
     roleError,
     roleLoading,

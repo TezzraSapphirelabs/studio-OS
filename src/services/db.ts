@@ -1,4 +1,4 @@
-import { doc, getDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, writeBatch } from 'firebase/firestore';
 import { type User } from 'firebase/auth';
 import { db } from '@/lib/firebase';
 import { type UserProfile, type UserRole } from '@/types';
@@ -18,23 +18,10 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
   const userSnap = await getDoc(userRef);
   console.log('[syncUserProfile] Fetched userSnap. exists():', userSnap.exists());
 
-  // No longer bootstrapping Platform Owners since the feature is removed.
-  // The first user will be pending, unless they are manually approved in the Firestore console.
-  
+
   if (userSnap.exists()) {
     const profile = userSnap.data() as UserProfile;
-    console.log('[syncUserProfile] Existing profile status:', profile.status);
-    
-    // Migration: If the user doesn't have a status, default to pending
-    if (!profile.status) {
-      profile.status = 'pending';
-      console.log('[syncUserProfile] Setting profile.status to:', profile.status);
-      await updateDoc(userRef, { 
-        status: profile.status,
-        updatedAt: new Date().toISOString()
-      });
-    }
-    
+
     return profile;
   }
 
@@ -47,7 +34,6 @@ export async function syncUserProfile(user: User): Promise<UserProfile> {
     displayName: user.displayName || user.email?.split('@')[0] || 'Unknown User',
     photoURL: user.photoURL || null,
     role: 'Member' as UserRole,
-    status: 'pending',
     createdAt: now,
     updatedAt: now,
   };

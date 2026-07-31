@@ -20,7 +20,7 @@ import {
   Sparkles, 
   FileBox, 
   Users,
-  UserPlus,
+
   Bell, 
   Settings,
   LogOut
@@ -77,7 +77,7 @@ const NavItem = ({ item, pathname, onClose }: { item: typeof NAV_ITEMS[0]; pathn
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { user, userProfile, logout, isPlatformOwner } = useAuth();
+  const { user, userProfile, logout } = useAuth();
 
 
 
@@ -116,9 +116,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {NAV_ITEMS.map((item) => (
             <NavItem key={item.href} item={item} pathname={pathname} onClose={onClose} />
           ))}
-          {isPlatformOwner && (
-            <NavItem item={{ label: "Access Requests", href: "/platform/requests", icon: UserPlus }} pathname={pathname} onClose={onClose} />
-          )}
+
         </div>
 
         {/* Bottom Nav */}

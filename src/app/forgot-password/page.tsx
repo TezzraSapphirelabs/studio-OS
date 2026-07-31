@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/auth-context';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { user, loading: authLoading, roleLoading, isPending, forgotPassword, userProfile, isPlatformOwner } = useAuth();
+  const { user, loading: authLoading, roleLoading, forgotPassword, userProfile } = useAuth();
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,15 +17,9 @@ export default function ForgotPasswordPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && !roleLoading && user && userProfile) {
-      if (isPending) {
-        router.replace('/pending');
-      } else if (isPlatformOwner) {
-        router.replace('/platform/requests');
-      } else {
-        router.replace('/dashboard');
-      }
+      router.replace('/dashboard');
     }
-  }, [authLoading, roleLoading, user, userProfile, isPending, isPlatformOwner, router]);
+  }, [authLoading, roleLoading, user, userProfile, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
