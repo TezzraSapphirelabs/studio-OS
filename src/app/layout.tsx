@@ -19,30 +19,30 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Velonos — Creative Project Management',
-  description: 'A modern project management operating system for creative teams. Organize projects, track tasks, and collaborate seamlessly.',
-  keywords: ['project management', 'creative tools', 'task tracking', 'team collaboration'],
-  metadataBase: new URL('https://studio-os.com'),
+  title: 'Velonos CPM | Creative Project Management Platform',
+  description: 'Velonos CPM is a modern creative project management platform for creative teams, agencies, freelancers, and studios.',
+  keywords: ['project management', 'creative tools', 'task tracking', 'team collaboration', 'Creative Project Management'],
+  metadataBase: new URL('https://velonos.dpdns.org'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://studio-os.com',
-    title: 'Velonos — Creative Project Management',
-    description: 'A modern project management operating system for creative teams. Organize projects, track tasks, and collaborate seamlessly.',
-    siteName: 'Velonos',
+    url: 'https://velonos.dpdns.org',
+    title: 'Velonos CPM',
+    description: 'Modern creative project management platform.',
+    siteName: 'Velonos CPM',
     images: [
       {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Velonos Dashboard',
+        alt: 'Velonos CPM',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Velonos — Creative Project Management',
-    description: 'A modern project management operating system for creative teams. Organize projects, track tasks, and collaborate seamlessly.',
+    title: 'Velonos CPM',
+    description: 'Modern creative project management platform.',
     images: ['/og-image.jpg'],
   },
   robots: {
@@ -56,8 +56,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': ['WebSite', 'Organization'],
+    name: 'Velonos CPM',
+    alternateName: 'Velonos',
+    url: 'https://velonos.dpdns.org',
+    logo: 'https://velonos.dpdns.org/og-image.jpg',
+    description: 'Velonos CPM is a modern creative project management platform for creative teams, agencies, freelancers, and studios.',
+  };
+
   return (
     <html lang="en" className={`${inter.variable} dark antialiased`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen bg-background text-foreground">
         <ToastProvider>
           <AuthProvider>

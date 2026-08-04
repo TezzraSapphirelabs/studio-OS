@@ -21,7 +21,7 @@ export const TopNav = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
         <div className="hidden lg:flex items-center gap-3">
           <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
           <span className="text-[13px] font-semibold tracking-widest uppercase text-white/90">
-            Velonos
+            Velonos CPM
           </span>
         </div>
       </div>

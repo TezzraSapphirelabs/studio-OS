@@ -4,7 +4,7 @@
 
 import type { NavItem } from '@/types';
 
-export const APP_NAME = 'Velonos';
+export const APP_NAME = 'Velonos CPM';
 export const APP_DESCRIPTION = 'A modern project management operating system for creative teams';
 export const APP_VERSION = '0.1.0';
 

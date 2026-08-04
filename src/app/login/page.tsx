@@ -141,7 +141,7 @@ function LoginContent() {
         className="absolute top-8 left-8 lg:top-12 lg:left-12 z-50 flex items-center gap-3"
       >
         <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
-        <span className="text-[12px] font-semibold tracking-widest uppercase text-white/80">Velonos</span>
+        <span className="text-[12px] font-semibold tracking-widest uppercase text-white/80">Velonos CPM</span>
       </motion.div>
 
       {/* Main Container */}
@@ -166,7 +166,7 @@ function LoginContent() {
               {isLinking 
                 ? `Please authenticate to link your ${linkProvider} account.`
                 : isSignUp 
-                ? 'Join Velonos today.' 
+                ? 'Join Velonos CPM today.' 
                 : 'Enter your details to sign in to your workspace.'}
             </motion.p>
           </motion.div>
