@@ -203,6 +203,20 @@ export async function getAllWorkspaceMembers() {
     
     const members = snap.docs.map(d => {
       const data = d.data();
+      
+      // Safely handle Firestore Timestamps which cause Next.js Server Component serialization errors
+      let joinedAtStr = new Date().toISOString();
+      if (data.joinedAt) {
+        if (typeof data.joinedAt === 'string') {
+          joinedAtStr = data.joinedAt;
+        } else if (typeof data.joinedAt.toDate === 'function') {
+          joinedAtStr = data.joinedAt.toDate().toISOString();
+        } else if (data.joinedAt._seconds || data.joinedAt.seconds) {
+          const secs = data.joinedAt._seconds || data.joinedAt.seconds;
+          joinedAtStr = new Date(secs * 1000).toISOString();
+        }
+      }
+
       return {
         id: d.id,
         workspaceId: data.workspaceId ?? '',
@@ -211,7 +225,7 @@ export async function getAllWorkspaceMembers() {
         displayName: data.displayName ?? 'Unknown User',
         photoURL: data.photoURL ?? null,
         role: data.role ?? 'member',
-        joinedAt: data.joinedAt ?? new Date().toISOString(),
+        joinedAt: joinedAtStr,
       };
     });
 
@@ -219,7 +233,8 @@ export async function getAllWorkspaceMembers() {
     const uniqueMembers = Array.from(new Map(members.map(m => [m.userId, m])).values());
     
     return { members: uniqueMembers };
-  } catch (error) {
-    return { error: 'Failed to fetch all workspace members' };
+  } catch (error: any) {
+    console.error('[getAllWorkspaceMembers] Backend Error:', error);
+    return { error: error.message || 'Failed to fetch all workspace members' };
   }
 }
