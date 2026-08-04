@@ -47,18 +47,33 @@ export default function MembersPage() {
   async function loadMembers() {
     if (!workspaceId) return;
     setLoading(true);
+    setError(null);
     
-    const [wsRes, poRes] = await Promise.all([
-      fetchWorkspaceMembers(workspaceId),
-      getPublicPlatformOwners()
-    ]);
-    
-    if (wsRes.error) setError(wsRes.error);
-    else if (wsRes.members) setMembers(wsRes.members);
-    
-    if (poRes.owners) setPlatformOwners(poRes.owners as UIMember[]);
-
-    setLoading(false);
+    try {
+      // Execute concurrently but catch rejections from each to prevent Promise.all from failing entirely
+      const wsPromise = fetchWorkspaceMembers(workspaceId).catch(
+        (e): Awaited<ReturnType<typeof fetchWorkspaceMembers>> => ({ error: e.message || 'Failed to fetch members' })
+      );
+      const poPromise = getPublicPlatformOwners().catch(
+        (e): Awaited<ReturnType<typeof getPublicPlatformOwners>> => ({ error: 'Failed to fetch platform owners' })
+      );
+      
+      const [wsRes, poRes] = await Promise.all([wsPromise, poPromise]);
+      
+      if (wsRes.error) {
+        setError(wsRes.error);
+      } else if (wsRes.members) {
+        setMembers(wsRes.members);
+      }
+      
+      if (poRes && poRes.owners) {
+        setPlatformOwners(poRes.owners as UIMember[]);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred while loading members.');
+    } finally {
+      setLoading(false);
+    }
   }
 
 
@@ -89,9 +104,14 @@ export default function MembersPage() {
     if (selectedMember && selectedMember.id === memberId) {
       setSelectedMember(prev => prev ? { ...prev, role: newRole } : prev);
     }
-    const { error: updateErr } = await updateMemberRole(workspaceId, userId, newRole, user.uid);
-    if (updateErr) {
-      alert(updateErr);
+    try {
+      const { error: updateErr } = await updateMemberRole(workspaceId, userId, newRole, user.uid);
+      if (updateErr) {
+        alert(updateErr);
+        loadMembers(); // Revert
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to update role');
       loadMembers(); // Revert
     }
   };
@@ -102,9 +122,14 @@ export default function MembersPage() {
     
     // Optimistic update
     setMembers(prev => prev.filter(m => m.id !== memberId));
-    const { error: removeErr } = await removeMember(workspaceId, userId, user.uid);
-    if (removeErr) {
-      alert(removeErr);
+    try {
+      const { error: removeErr } = await removeMember(workspaceId, userId, user.uid);
+      if (removeErr) {
+        alert(removeErr);
+        loadMembers(); // Revert
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to remove member');
       loadMembers(); // Revert
     }
   };
