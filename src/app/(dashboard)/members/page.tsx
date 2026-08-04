@@ -5,7 +5,8 @@ import { GlassCard, EmptyState } from '@/components';
 import { Input } from '@/components/ui';
 import { SearchIcon } from '@/components/icons';
 import { useAuth } from '@/contexts/auth-context';
-import { updateMemberRole, removeMember, getAllWorkspaceMembers } from '@/app/actions/members';
+import { fetchWorkspaceMembers } from '@/services/workspace';
+import { updateMemberRole, removeMember, getPublicPlatformOwners } from '@/app/actions/members';
 import type { WorkspaceMember, WorkspaceRole } from '@/types';
 import { getInitials, formatRelativeDate } from '@/utils';
 import Image from 'next/image';
@@ -25,6 +26,7 @@ type UIMember = WorkspaceMember & { isPlatformOwner?: boolean };
 export default function MembersPage() {
   const { user } = useAuth();
   const [members, setMembers] = useState<UIMember[]>([]);
+  const [platformOwners, setPlatformOwners] = useState<UIMember[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,16 +50,24 @@ export default function MembersPage() {
     setError(null);
     
     try {
-      const wsPromise = getAllWorkspaceMembers().catch(
-        (e): Awaited<ReturnType<typeof getAllWorkspaceMembers>> => ({ error: e.message || 'Failed to fetch members' })
+      // Execute concurrently but catch rejections from each to prevent Promise.all from failing entirely
+      const wsPromise = fetchWorkspaceMembers(workspaceId).catch(
+        (e): Awaited<ReturnType<typeof fetchWorkspaceMembers>> => ({ error: e.message || 'Failed to fetch members' })
+      );
+      const poPromise = getPublicPlatformOwners().catch(
+        (e): Awaited<ReturnType<typeof getPublicPlatformOwners>> => ({ error: 'Failed to fetch platform owners' })
       );
       
-      const wsRes = await wsPromise;
+      const [wsRes, poRes] = await Promise.all([wsPromise, poPromise]);
       
       if (wsRes.error) {
         setError(wsRes.error);
       } else if (wsRes.members) {
         setMembers(wsRes.members);
+      }
+      
+      if (poRes && poRes.owners) {
+        setPlatformOwners(poRes.owners as UIMember[]);
       }
     } catch (err: any) {
       setError(err.message || 'An unexpected error occurred while loading members.');
@@ -78,7 +88,14 @@ export default function MembersPage() {
     ));
   }, [members, searchQuery]);
 
-
+  const filteredOwners = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return platformOwners.filter(m => (
+      m.displayName.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q) ||
+      'platform owner'.includes(q)
+    ));
+  }, [platformOwners, searchQuery]);
 
   const handleRoleChange = async (memberId: string, userId: string, newRole: WorkspaceRole) => {
     if (!workspaceId || !user) return;
@@ -185,7 +202,7 @@ export default function MembersPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Workspace Members ({members.length})</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Members Workspace</h1>
           <p className="mt-1 text-sm text-white/40">
             Manage your workspace members and their roles.
           </p>
@@ -214,7 +231,7 @@ export default function MembersPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-white/80" />
           <p className="mt-4 text-sm text-white/40">Loading members...</p>
         </div>
-      ) : filteredMembers.length === 0 ? (
+      ) : (filteredMembers.length === 0 && filteredOwners.length === 0) ? (
         <EmptyState
           icon={<SearchIcon size={36} />}
           title="No members found"
@@ -222,9 +239,23 @@ export default function MembersPage() {
         />
       ) : (
         <div className="space-y-12">
+          {/* Platform Owners Section */}
+          {filteredOwners.length > 0 && (
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-white/90">Platform Owners</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredOwners.map(renderMemberCard)}
+              </div>
+            </div>
+          )}
+
+          {/* Workspace Members Section */}
           {filteredMembers.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredMembers.map(renderMemberCard)}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-white/90">Workspace Members</h2>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredMembers.map(renderMemberCard)}
+              </div>
             </div>
           )}
         </div>
