@@ -196,3 +196,30 @@ export async function getPublicPlatformOwners() {
     return { error: 'Failed to fetch platform owners' };
   }
 }
+
+export async function getAllWorkspaceMembers() {
+  try {
+    const snap = await adminDb.collection('workspaceMembers').get();
+    
+    const members = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        workspaceId: data.workspaceId ?? '',
+        userId: data.userId ?? '',
+        email: data.email ?? '',
+        displayName: data.displayName ?? 'Unknown User',
+        photoURL: data.photoURL ?? null,
+        role: data.role ?? 'member',
+        joinedAt: data.joinedAt ?? new Date().toISOString(),
+      };
+    });
+
+    // Deduplicate by userId to avoid duplicate member documents
+    const uniqueMembers = Array.from(new Map(members.map(m => [m.userId, m])).values());
+    
+    return { members: uniqueMembers };
+  } catch (error) {
+    return { error: 'Failed to fetch all workspace members' };
+  }
+}
