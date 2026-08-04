@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/'],
     },
-    sitemap: 'https://studio-os.com/sitemap.xml',
+    sitemap: 'https://velonos.dpdns.org/sitemap.xml',
   };
 }
